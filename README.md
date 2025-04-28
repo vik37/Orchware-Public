@@ -4,6 +4,9 @@
 
 _"Limited access to the core code may mean that some functionalities are not directly visible here."_
 
+## 🚧 Work in Progress  
+This project is currently in its **early development stage**. Some features are still being implemented, and the architecture may evolve over time. Contributions and feedback are welcome!  
+
 📦 **Orchware System**  
 **Orchware** is a system for managing **Backoffice and Frontoffice services**, built on **.NET 8** with a focus on **clean and modular architecture**.  
 It handles **inventory, orders, and shipping operations**, using modern **DDD**, **Vertical Slice Architecture**, and a **Common Library** for shared functionalities.  
@@ -75,27 +78,23 @@ src/
 
 ### **Running the system**  
 
+## 🚀 Quick Start  
+
+**Clone the repository**  
 ```bash
-# Clone the repository
 git clone https://github.com/your-repo/orchware.git
-cd orchware
-
-# Restore dependencies
-dotnet restore
-
-# Apply database migrations for Backoffice
-cd src/Backoffice/Orchware.Backoffice.Infrastructure
-dotnet ef database update
-
-# Start Backoffice API
-cd src/Backoffice/Orchware.Backoffice.API
-dotnet run
-
-# Start Frontoffice API
-cd src/Frontoffice/Orchware.Frontoffice.API
-dotnet run
+cd orchware run
 ```
 
+**Setup Dependency** 
+```Bash
+dotnet restore
+```
+**Run the Services** 
+```Bash
+dotnet run --project src/Backoffice/Orchware.Backoffice.API
+dotnet run --project src/Frontoffice/Orchware.Frontoffice.API
+```
 ---
 
 ## 📦 **Common Libraries**  
@@ -173,6 +172,12 @@ var query = new SqlQueryBuilder()
 
 ## 🐳 **Docker Support**  
 ✅ **Docker** is supported for easier deployment.  
+
+---
+
+### 🚀 Upcoming Features  
+- **Notification Service** – Currently in early development. Will handle **event tracking and real-time notifications** via SignalR.  
+- **Email Service or Azure Integration** – Planned but not yet started.  
 
 ---
 
