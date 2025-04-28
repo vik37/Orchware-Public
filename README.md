@@ -116,7 +116,7 @@ dotnet run
 
 ## UML Diagram
 
-![File Service UML Diagram](images/uml-fsdp-diagram.png)
+![File Service UML Diagram](git_docs/images/uml-fsdp-diagram.png)
 
 ## Example where it is referenced in the project
 
@@ -138,7 +138,7 @@ private IEnumerable<T> GetDataFromFile<T>(string filename) where T : class, new(
 🏗 **Design Patterns**
 - Use **Builder Pattern (Fluent Interface)** for easy and secure SQL building queries.
 
-### Табела
+### Table
 
 | Pattern | Description |
 |:----|:-----|
