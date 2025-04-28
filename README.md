@@ -99,8 +99,11 @@ dotnet run --project src/Frontoffice/Orchware.Frontoffice.API
 
 ## 📦 **Common Libraries**  
 
-### **FileStorage**  
-✅ Manages **file operations** across services (CSV, Excel, Azure).
+✅ Manages **file operations** across services:  
+
+- **File Format:** `["CSV", "Excel", "other file types..."]`  
+- **File Source:** `["Local", "Azure", "other file storages..."]`  
+
 
 🏗 **Design Patterns**
 
@@ -120,8 +123,7 @@ dotnet run --project src/Frontoffice/Orchware.Frontoffice.API
 ## Example where it is referenced in the project
 
 _OrchwareBackInitializer_
-``
-line 79
+```line 79
 
 private IEnumerable<T> GetDataFromFile<T>(string filename) where T : class, new()
 {
@@ -129,7 +131,7 @@ private IEnumerable<T> GetDataFromFile<T>(string filename) where T : class, new(
 	var fileService = _fileServiceFactory.Create<T,CSVFormatFileService<T>>(FileSource.Local, FileFormat.CSV);
 	return fileService.ReadFromFile(filePath).Result;
 }
-``
+```
 
 ### **DbQueryBuilder**  
 ✅ Fluent API for dynamic SQL queries using **Dapper, ADO .NET**.
