@@ -179,7 +179,7 @@ var query = new SqlQueryBuilder()
 - **Notification Service** – Currently in early development. Will handle **event tracking and real-time notifications** via SignalR.  
 - **Email Service or Azure Integration** – Planned but not yet started.  
 - **Frontend with Angular** – The system will have an Angular-based UI for interacting with Backoffice and Frontoffice APIs.   
-- **Keycloak for Authentication & Authorization** – Planned integration for secure **identity management** and role-based access control (RBAC).  
+- **Keycloak for Authentication & Authorization** – Planned integration for secure **identity management**.  
  
 ---
 
