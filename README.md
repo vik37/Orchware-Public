@@ -123,7 +123,8 @@ dotnet run --project src/Frontoffice/Orchware.Frontoffice.API
 ## Example where it is referenced in the project
 
 _OrchwareBackInitializer_
-```line 79
+```
+line 79
 
 private IEnumerable<T> GetDataFromFile<T>(string filename) where T : class, new()
 {
@@ -131,6 +132,17 @@ private IEnumerable<T> GetDataFromFile<T>(string filename) where T : class, new(
 	var fileService = _fileServiceFactory.Create<T,CSVFormatFileService<T>>(FileSource.Local, FileFormat.CSV);
 	return fileService.ReadFromFile(filePath).Result;
 }
+```
+
+_OrchwareBack Registration_
+```
+namespace Orchware.Backoffice.Infrastructure.Persistence;
+
+class PersistenceServiceRegistration
+
+  ...
+
+services.AddFileServices();
 ```
 
 ### **DbQueryBuilder**  
