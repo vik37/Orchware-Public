@@ -1,0 +1,61 @@
+Id,Name,SeasonalFruits,AvailableQuantity,Price,MinQuantity,Units,Image
+0,Apple,1,184.1,0.74,4,3,apple.jpg
+0,Pear,1,162.83,2.71,5,3,pear.jpg
+0,Kiwi,1,12.15,4.99,1,2,kiwi.jpg
+0,Pomegranate,1,465.65,7.22,2,3,pomegranate.jpg
+0,Mandarin,1,244.21,1.64,1,1,mandarin.jpg
+0,Orange,1,111.39,4.16,3,3,orange.jpg
+0,Lemon,1,64.0,5.72,3,3,lemon.jpg
+0,Grapefruit,1,242.92,0.85,2,2,grapefruit.jpg
+0,Persimmon,1,364.66,0.52,3,1,persimmon.jpg
+0,Clementine,1,259.14,9.92,2,1,clementine.jpg
+0,Plum,1,494.94,7.89,3,2,plum.jpg
+0,Blackcurrant,1,367.52,3.03,5,3,blackcurrant.jpg
+0,Redcurrant,1,242.84,1.63,3,1,redcurrant.jpg
+0,Dried Fig,1,214.27,7.98,2,1,dried_fig.jpg
+0,Dried Plum,1,447.75,9.64,4,2,dried_plum.jpg
+0,Raisin,1,78.55,4.29,1,2,raisin.jpg
+0,Dried Apricot,1,261.74,6.61,2,2,dried_apricot.jpg
+0,Dried Pineapple,1,10.21,5.72,5,2,dried_pineapple.jpg
+0,Quince,1,35.21,3.51,5,1,quince.jpg
+0,Winter Melon,1,135.23,9.53,5,1,winter_melon.jpg
+0,Strawberry,2,332.27,8.84,4,2,strawberry.jpg
+0,Cherry,2,292.52,4.72,4,3,cherry.jpg
+0,Apricot,2,310.05,7.01,2,3,apricot.jpg
+0,Nectarine,2,308.19,4.12,2,3,nectarine.jpg
+0,Peach,2,323.12,9.68,3,2,peach.jpg
+0,Raspberry,2,101.08,4.85,1,2,raspberry.jpg
+0,Blueberry,2,196.87,1.21,2,1,blueberry.jpg
+0,Hawthorn,2,244.39,3.73,4,3,hawthorn.jpg
+0,Goji Berry,2,223.18,4.56,2,1,goji_berry.jpg
+0,Rhubarb,2,452.26,9.69,1,3,rhubarb.jpg
+0,Currant,2,81.14,6.75,3,2,currant.jpg
+0,Medlar,2,243.87,9.13,4,2,medlar.jpg
+0,Blackberry,2,53.83,4.89,1,1,blackberry.jpg
+0,Lychee,2,98.29,7.69,1,2,lychee.jpg
+0,Guava,2,453.62,0.9,1,1,guava.jpg
+0,Spring Pear,2,191.78,9.02,5,3,spring_pear.jpg
+0,Spring Apple,2,489.87,1.59,4,2,spring_apple.jpg
+0,Spring Blackcurrant,2,385.22,3.54,1,1,spring_blackcurrant.jpg
+0,Spring Redcurrant,2,416.05,9.41,3,1,spring_redcurrant.jpg
+0,Spring Grapefruit,2,12.48,9.78,4,2,spring_grapefruit.jpg
+0,Watermelon,3,457.9,1.85,5,2,watermelon.jpg
+0,Melon,3,381.04,4.25,2,2,melon.jpg
+0,Fig,3,334.29,7.73,3,3,fig.jpg
+0,Pineapple,3,455.45,1.8,3,3,pineapple.jpg
+0,Mango,3,435.17,5.32,4,3,mango.jpg
+0,Papaya,3,272.51,9.08,3,3,papaya.jpg
+0,Banana,3,250.63,9.65,5,1,banana.jpg
+0,Coconut,3,324.88,1.13,5,3,coconut.jpg
+0,Dragon Fruit,3,322.11,6.59,4,2,dragon_fruit.jpg
+0,Rambutan,3,122.79,7.04,2,2,rambutan.jpg
+0,Passion Fruit,3,103.01,6.28,2,1,passion_fruit.jpg
+0,Kiwano,3,278.8,5.26,4,1,kiwano.jpg
+0,Durian,3,367.63,0.94,2,1,durian.jpg
+0,Tamarind,3,16.08,7.5,5,3,tamarind.jpg
+0,Longan,3,424.32,8.54,1,1,longan.jpg
+0,Kumquat,3,44.77,9.73,4,2,kumquat.jpg
+0,Mangosteen,3,227.75,8.18,2,3,mangosteen.jpg
+0,Sapote,3,61.89,0.93,3,2,sapote.jpg
+0,Sapodilla,3,212.59,2.79,5,2,sapodilla.jpg
+0,Jackfruit,3,73.76,5.48,5,2,jackfruit.jpg

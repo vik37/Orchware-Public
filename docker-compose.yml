@@ -1,0 +1,46 @@
+
+services:
+
+  orchware.frontoffice.api:
+    image: orchwarefrontofficeapi:latest
+    container_name: orchware.frontoffice.api
+    build:
+      context: .
+      dockerfile: src/Frontoffice/Orchware.Frontoffice.API/Dockerfile
+    depends_on:
+      - mssql
+    restart: always
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  orchware.backoffice.api:
+    image: orchwarebackofficeapi:latest
+    container_name: orchware.backoffice.api
+    build:
+      context: .
+      dockerfile: src/Backoffice/Orchware.Backoffice.API/Dockerfile
+    depends_on:
+      - mssql
+    restart: always
+    ports:
+      - "9090:9090"
+      - "9091:9091"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=your_secure_password_here
+    volumes:
+      - mssqldata:/var/opt/mssql
+
+volumes:
+  mssqldata:
