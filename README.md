@@ -151,7 +151,7 @@ private IEnumerable<T> GetDataFromFile<T>(string filename) where T : class, new(
 
 ---
 
-### Пример користење
+### Using Example
 
 ```csharp
 var query = new SqlQueryBuilder()
