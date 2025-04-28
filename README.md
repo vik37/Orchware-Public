@@ -178,6 +178,8 @@ var query = new SqlQueryBuilder()
 ### 🚀 Upcoming Features  
 - **Notification Service** – Currently in early development. Will handle **event tracking and real-time notifications** via SignalR.  
 - **Email Service or Azure Integration** – Planned but not yet started.  
+- **Frontend with Angular** – The system will have an Angular-based UI for interacting with Backoffice and Frontoffice APIs.  
+- **Email Service or Azure Integration** – Exploring possibilities for integrating **Azure Functions**, **Logic Apps**, or **Azure Blob Storage** for file management.  
 
 ---
 
