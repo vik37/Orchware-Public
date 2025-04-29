@@ -22,7 +22,38 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 
 ---
 
-## 📋 **Overview**  
+### 📌 **Business Overview**
+
+**Orchware** is a portfolio project designed to simulate real-world fruit warehouse operations with a structured, modular architecture. Unlike traditional monolithic or microservices approaches, Orchware balances scalability, flexibility, and maintainability through a clear Backoffice & Frontoffice separation.
+🔹 **Backoffice Service** – Manages inventory, orders, payments, and warehouse logistics.
+🔹 **Frontoffice Service** – Provides customer access to products, order requests, and company registration.
+🔹 **Common Libraries** – Shared utilities for file handling, structured SQL queries, and validation.
+This system allows fruit wholesalers to efficiently manage ordering, storage, and distribution operations, ensuring streamlined workflows from order creation to final shipment
+
+
+---
+
+## 🚀 Business Logic & Order Flow
+
+# 👤 Roles in Orchware
+📌 Manager: Oversees customer orders, inventory shortages, payment tracking, and approvals.
+📌 Warehouseman: Packs, loads, and ensures shipments are prepared for transport.
+🛠 Order Lifecycle & Statuses
+1️⃣ Customer selects products → Pending Order
+2️⃣ Order request sent → Status: Requested
+3️⃣ Manager confirms availability → Status: Confirmed
+4️⃣ Warehouse processes shipment → Status: Assigned to Warehouse / In Preparation
+5️⃣ Products packed → Status: Awaiting Dispatch
+6️⃣ Shipment begins → Delivery Stage
+7️⃣ Customer receives order → Completed
+🚨 Cancellation & Payment Rules:
+❌ Orders can be canceled before loading into transport unless payment is delayed.
+✅ Customers must pay within 3 days or provide a guarantee, otherwise, the shipment is canceled.
+
+
+---
+
+## 📋 **Technical Overview**  
 
 ### **Backoffice**  
 ✅ Built using **Clean Architecture** and **Domain-Driven Design (DDD)** principles.  
