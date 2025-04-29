@@ -24,10 +24,10 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 
 ### 📌 **Business Overview**
 
-**Orchware** is a portfolio project designed to simulate real-world fruit warehouse operations with a structured, modular architecture. Unlike traditional monolithic or microservices approaches, Orchware balances scalability, flexibility, and maintainability through a clear Backoffice & Frontoffice separation.
-🔹 **Backoffice Service** – Manages inventory, orders, payments, and warehouse logistics.
-🔹 **Frontoffice Service** – Provides customer access to products, order requests, and company registration.
-🔹 **Common Libraries** – Shared utilities for file handling, structured SQL queries, and validation.
+**Orchware** is a portfolio project designed to simulate real-world fruit warehouse operations with a structured, modular architecture. Unlike traditional monolithic or microservices approaches, Orchware balances scalability, flexibility, and maintainability through a clear Backoffice & Frontoffice separation.          
+🔹 **Backoffice Service** – Manages inventory, orders, payments, and warehouse logistics           
+🔹 **Frontoffice Service** – Provides customer access to products, order requests, and company registration.          
+🔹 **Common Libraries** – Shared utilities for file handling, structured SQL queries, and validation.           
 This system allows fruit wholesalers to efficiently manage ordering, storage, and distribution operations, ensuring streamlined workflows from order creation to final shipment
 
 
