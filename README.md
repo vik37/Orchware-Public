@@ -35,20 +35,29 @@ This system allows fruit wholesalers to efficiently manage ordering, storage, an
 
 ## 🚀 Business Logic & Order Flow
 
-# 👤 Roles in Orchware
-📌 Manager: Oversees customer orders, inventory shortages, payment tracking, and approvals.
-📌 Warehouseman: Packs, loads, and ensures shipments are prepared for transport.
-🛠 Order Lifecycle & Statuses
+# 👤 Roles in Orchware        
+📌 Manager: Oversees customer orders, inventory shortages, payment tracking, and approvals.  
+📌 Warehouseman: Packs, loads, and ensures shipments are prepared for transport.      
+🛠 Order Lifecycle & Statuses    
+
 1️⃣ Customer selects products → Pending Order
+
 2️⃣ Order request sent → Status: Requested
+
 3️⃣ Manager confirms availability → Status: Confirmed
+
 4️⃣ Warehouse processes shipment → Status: Assigned to Warehouse / In Preparation
+
 5️⃣ Products packed → Status: Awaiting Dispatch
+
 6️⃣ Shipment begins → Delivery Stage
+
 7️⃣ Customer receives order → Completed
-🚨 Cancellation & Payment Rules:
-❌ Orders can be canceled before loading into transport unless payment is delayed.
-✅ Customers must pay within 3 days or provide a guarantee, otherwise, the shipment is canceled.
+
+## 🚨 Cancellation & Payment Rules:   
+
+❌ Orders can be canceled before loading into transport unless payment is delayed.       
+✅ Customers must pay within 3 days or provide a guarantee; otherwise, the shipment is canceled.
 
 
 ---
