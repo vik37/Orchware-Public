@@ -2,17 +2,18 @@
 
 ## Reference to the private Orchware repo—core foundation of this project.
 
-_"Limited access to the core code may mean that some functionalities are not directly visible here."_
+_"Limited access to the core code may mean some functionalities are not directly visible here."_
 
 ## 🚧 Work in Progress  
-This project is currently in its **early development stage**. Some features are still being implemented, and the architecture may evolve over time. Contributions and feedback are welcome!  
+This project is currently in its **early development stage**. Some features are still being implemented, and the architecture may evolve. Contributions and feedback are welcome!  
 
 📦 **Orchware System**  
 **Orchware** is a system for managing **Backoffice and Frontoffice services**, built on **.NET 8** with a focus on **clean and modular architecture**.  
 It handles **inventory, orders, and shipping operations**, using modern **DDD**, **Vertical Slice Architecture**, and a **Common Library** for shared functionalities.  
 
 ## 📑 **Table of Contents**  
-🔹 [Overview](#overview)  
+🔹 [Business Overview](#business-overview)    
+🔹 [Business Logic & Order Flow](#business-logic)   
 🔹 [Technologies Used](#technologies-used)  
 🔹 [Project Structure](#project-structure)  
 🔹 [Setup Instructions](#setup-instructions)  
@@ -22,7 +23,7 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 
 ---
 
-### 📌 **Business Overview**
+## 📌 **Business Overview**
 
 **Orchware** is a portfolio project designed to simulate real-world fruit warehouse operations with a structured, modular architecture. Unlike traditional monolithic or microservices approaches, Orchware balances scalability, flexibility, and maintainability through a clear Backoffice & Frontoffice separation.          
 🔹 **Backoffice Service** – Manages inventory, orders, payments, and warehouse logistics           
@@ -35,7 +36,7 @@ This system allows fruit wholesalers to efficiently manage ordering, storage, an
 
 ## 🚀 Business Logic & Order Flow
 
-# 👤 Roles in Orchware        
+### 👤 Roles in Orchware        
 📌 Manager: Oversees customer orders, inventory shortages, payment tracking, and approvals.  
 📌 Warehouseman: Packs, loads, and ensures shipments are prepared for transport.      
 🛠 Order Lifecycle & Statuses    
