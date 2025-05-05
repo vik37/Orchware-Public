@@ -256,6 +256,10 @@ The reason this project does **not** follow a microservices architecture is that
 
 Despite not being a full monolithic structure, this project follows a **modular approach**, allowing me to demonstrate expertise in **event-driven architecture, cloud-based solutions, and multi-service interaction**. This strategy showcases a practical application of modern system design while maintaining simplicity for portfolio purposes.  
 
+## Articles & Publications
+
+- [System Designed from My Own Experience](https://www.linkedin.com/pulse/system-designed-from-my-own-experience-viktor-zafirovski-ez7wf) – An article where I share insights on software system design based on real-world experience.
+
 ## License
 
 [MIT](https://github.com/vik37/Orchware-Public/blob/main/LICENSE.txt)
