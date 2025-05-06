@@ -263,3 +263,38 @@ Despite not being a full monolithic structure, this project follows a **modular 
 ## License
 
 [MIT](https://github.com/vik37/Orchware-Public/blob/main/LICENSE.txt)
+
+----------------------------------------------------------           
+
+# NEWS:
+
+## 🆕 What's New
+
+### 🔍 Enhanced Search and Filtering Support
+
+The following improvements were added to support more dynamic and safe SQL filtering scenarios:
+
+- ✅ **SearchTerm Support**: You can now pass a `SearchTerm` (e.g., `"Ap"`) to filter rows where a product name starts with the given string. This is dynamically appended as a `WHERE` condition (e.g., `[Name] LIKE @SearchTerm + '%'`).
+- ✅ **MultiFilter Integration**: `MultiFilter` accepts multiple key-value-condition-based filters (JSON array), validated using existing permission and safety rules.
+- ✅ **Combined Filtering Logic**: Supports combining `Filter`, `SearchTerm`, and `MultiFilter` in a safe way inside stored procedures.
+- ✅ **SQL Injection Protection**: All dynamic conditions are passed through `SqlExpressionValidator`, which relies on field-level permission rules to ensure only safe conditions are applied.
+- ✅ **Fallbacks for Ordering**:
+  - `OrderBy`: Defaults to `"Id"` if not supplied.
+  - `OrderDirection`: Defaults to `"ASC"` and must be `"ASC"` or `"DESC"`.
+
+  ------------------------------------
+
+  ### 🔐 Permissions Layer
+
+- `IFieldPermissionProvider.cs`  
+  Interface that defines which fields and conditions are allowed to be used in the `WHERE` clause.
+
+- `SqlExpressionValidator.cs`  
+  Validates `FilterKeyValue` objects against defined permissions.  
+  ➕ **Now supports `MultiFilter` logic (JSON array with multiple filters)**  
+  ➕ **Adds support for safe `SearchTerm` integration into the final `WHERE` clause**  
+  ➕ **Validation is strict — if a filter is unsafe, `UnsafeSqlFilterException` is thrown**  
+  ➕ **Combining `Filter`, `MultiFilter`, and `SearchTerm` is now fully supported and secure**
+
+- `UnsafeSqlFilterException.cs`  
+  Custom exception thrown when an unsafe SQL filter is detected.

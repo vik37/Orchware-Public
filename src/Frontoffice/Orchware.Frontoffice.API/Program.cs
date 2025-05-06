@@ -1,8 +1,14 @@
 using FileStorage;
+using DbQueryBuilder;
+using FluentValidation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Orchware.Frontoffice.API.Common.Middleware;
+using Orchware.Frontoffice.API.Common.Pipeline;
 using Orchware.Frontoffice.API.Infrastructure.Persistence;
 using Orchware.Frontoffice.API.Infrastructure.Persistence.Dapper;
 using System.Reflection;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,17 +23,34 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<DapperContext>();
 
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+builder.Services.AddMediatR(conf => conf.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+
 builder.Services.AddDbContext<OrchwareDbContext>(opt =>
 {
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"), sqlOptions =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("MSSQLDbConnection"), sqlOptions =>
         sqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name));
 });
 
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>),typeof(ValidatorBehavior<,>));
+
 builder.Services.AddFileServices();
+builder.Services.AddDbQueryBuilder<OrchwareFrontofficeFieldPremmisionProvider>();
 
 builder.Services.AddScoped<OrchwareFrontInitializer>();
 
+builder.Services.AddSwaggerGen(opt =>
+{
+	var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+	var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+	opt.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+});
+
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -48,14 +71,7 @@ using(var scope = app.Services.CreateScope())
     var initializer = provider.GetRequiredService<OrchwareFrontInitializer>();
 
     string filePath = Path.Combine(app.Environment.ContentRootPath, "Files", "Product.csv");
-	try
-	{
-		await initializer.InitializeData(filePath);
-	}
-	catch (Exception ex)
-	{
-		app.Logger.LogError(ex, "Failed to initialize product data.");
-	}
+    await initializer.InitializeData(filePath);
 }
 
 app.Run();

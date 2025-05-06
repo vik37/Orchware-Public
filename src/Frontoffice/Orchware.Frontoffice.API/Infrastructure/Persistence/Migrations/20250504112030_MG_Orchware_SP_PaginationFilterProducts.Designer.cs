@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Orchware.Frontoffice.API.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Orchware.Frontoffice.API.Infrastructure.Persistence;
 namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(OrchwareDbContext))]
-    partial class OrchwareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250504112030_MG_Orchware_SP_PaginationFilterProducts")]
+    partial class MG_Orchware_SP_PaginationFilterProducts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
