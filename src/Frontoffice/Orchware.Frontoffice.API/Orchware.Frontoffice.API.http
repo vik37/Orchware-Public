@@ -1,4 +1,12 @@
-@Orchware.Frontoffice.API_HostAddress = http://localhost:5271
+@Orchware.Frontoffice.API_HostAddress = http://localhost:5262
 
+POST {{Orchware.Frontoffice.API_HostAddress}}/api/products
+Accept: application/json
+Content-Type: application/json
+{
+  "pageIndex": 1,
+  "pageSize": 10,
+  "orderBy": "Price",
+  "orderDirection": "ASC"
+}
 
-###

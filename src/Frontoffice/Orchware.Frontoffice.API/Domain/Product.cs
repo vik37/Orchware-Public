@@ -1,4 +1,5 @@
-﻿
+﻿using System.ComponentModel.DataAnnotations;
+
 namespace Orchware.Frontoffice.API.Domain;
 
 public class Product : BaseNamed
@@ -13,14 +14,20 @@ public class Product : BaseNamed
 
 public enum SeasonalFruits
 {
+	[Display(Name = "Winter")]
 	Winter = 1,
+	[Display(Name = "Spring")]
 	Spring,
+	[Display(Name = "Summer")]
 	Summer
 }
 
 public enum UnitsOfMeasure
 {
+	[Display(Name = "g")]
 	Grams = 1,
+	[Display(Name = "kg")]
 	Kilograms = 2,
+	[Display(Name = "t")]
 	Tones = 3
 }
