@@ -1,3 +1,26 @@
-@Orchware.Backoffice.API_HostAddress = http://localhost:5203
+﻿@Orchware.Backoffice.API_HostAddress = http://localhost:5203
 
 ###
+# Get Shelf Description
+GET {{Orchware.Backoffice.API_HostAddress}}/api/inventory
+Accept: application/json
+
+###
+# Get Shelves by Seasonal Fruit (пример со 'Winter')
+GET {{Orchware.Backoffice.API_HostAddress}}/api/inventory/season/Winter
+Accept: application/json
+
+###
+# Get Specific Shelf by Id (пример со ID = 2)
+GET {{Orchware.Backoffice.API_HostAddress}}/api/inventory/shelf/2
+Accept: application/json
+
+###
+# Get All Seasonal Fruits
+GET {{Orchware.Backoffice.API_HostAddress}}/api/inventory/seasonal-fruits
+Accept: application/json
+
+###
+# Get All Units of Measure
+GET {{Orchware.Backoffice.API_HostAddress}}/api/inventory/units-of-measure
+Accept: application/json

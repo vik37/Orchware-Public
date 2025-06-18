@@ -1,16 +1,21 @@
-using FileStorage;
 using DbQueryBuilder;
+using FileStorage;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Orchware.Frontoffice.API.Common.Configurations;
 using Orchware.Frontoffice.API.Common.Middleware;
 using Orchware.Frontoffice.API.Common.Pipeline;
 using Orchware.Frontoffice.API.Infrastructure.Persistence;
 using Orchware.Frontoffice.API.Infrastructure.Persistence.Dapper;
+using Serilog;
 using System.Reflection;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, logger) => 
+							logger.WriteTo.Console()
+											.ReadFrom.Configuration(context.Configuration));
 
 var env = Environment.CurrentDirectory;
 
@@ -28,9 +33,22 @@ builder.Services.AddMediatR(conf => conf.RegisterServicesFromAssembly(Assembly.G
 
 builder.Services.AddDbContext<OrchwareDbContext>(opt =>
 {
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("MSSQLDbConnection"), sqlOptions =>
-        sqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name));
+	var connectionString = builder.Configuration.GetConnectionString("MSSQLDbConnection")
+		?? throw new InvalidOperationException("Connection string not found!");
+
+	opt.UseSqlServer(connectionString, sqlOptions =>
+	{
+		sqlOptions.EnableRetryOnFailure(
+			maxRetryCount: 5,
+			maxRetryDelay: TimeSpan.FromSeconds(5),
+			errorNumbersToAdd: null
+		);
+
+		sqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+	});
 });
+
+builder.Services.AddPollyRegistrations();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>),typeof(ValidatorBehavior<,>));
@@ -48,30 +66,53 @@ builder.Services.AddSwaggerGen(opt =>
 	opt.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
 });
 
+builder.Services.AddCors(option =>
+{
+	option.AddPolicy("OrchwareFOPoliciesDev", policy =>
+	{
+		policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+			 .AllowAnyHeader()
+			 .AllowAnyMethod()
+			 .AllowCredentials();
+	});
+});
+
 var app = builder.Build();
 
-app.UseMiddleware<ExceptionMiddleware>();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+	app.UseMiddleware<ExceptionMiddleware>();
+
+	// Configure the HTTP request pipeline.
+	if (app.Environment.IsDevelopment())
+	{
+		app.UseSwagger();
+		app.UseSwaggerUI();
+	}
+
+	app.UseCors("OrchwareFOPoliciesDev");
+
+	app.UseSerilogRequestLogging();
+
+	app.UseHttpsRedirection();
+
+	app.UseAuthorization();
+
+	app.MapControllers();
+
+	using (var scope = app.Services.CreateScope())
+	{
+		var provider = scope.ServiceProvider;
+		var initializer = provider.GetRequiredService<OrchwareFrontInitializer>();
+
+		string filePath = Path.Combine(app.Environment.ContentRootPath, "Files", "Product.csv");
+		await initializer.InitializeData(filePath);
+	}
+
+	app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-using(var scope = app.Services.CreateScope())
+catch (Exception ex)
 {
-    var provider = scope.ServiceProvider;
-    var initializer = provider.GetRequiredService<OrchwareFrontInitializer>();
-
-    string filePath = Path.Combine(app.Environment.ContentRootPath, "Files", "Product.csv");
-    await initializer.InitializeData(filePath);
+	var logger = app.Services.GetRequiredService<ILogger<Program>>();
+	logger.LogError(ex, "Unhandled exception during ORCHWARE - FRONTOFFICE app startup.");
 }
-
-app.Run();

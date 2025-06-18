@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Orchware.Backoffice.Domain.Constants;
 using Orchware.Backoffice.Domain.Entities.Orders;
 
 namespace Orchware.Backoffice.Infrastructure.Persistence.OrchwareBackofficeDbConfiguration.OrdersConfigurations;
@@ -8,7 +9,7 @@ public class OrderDetailsConfiguration : IEntityTypeConfiguration<OrderDetails>
 {
 	public void Configure(EntityTypeBuilder<OrderDetails> builder)
 	{
-		builder.ToTable(nameof(OrderDetails), OrchwareBackofficeDbContext.OrderSchema);
+		builder.ToTable(nameof(OrderDetails), DomainSchema.Order);
 
 		builder.HasKey(x => x.Id);
 

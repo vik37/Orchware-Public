@@ -8,6 +8,7 @@ public class SqlQueryBuilder : ISqlQueryBuilder
 	private readonly List<string> _columns = new List<string>();
 	private bool _fromSet = false;
 	private string _orderByClause = "";
+	private string _groupByClause = "";
 
 	public ISqlQueryBuilder Select(string columns)
 	{
@@ -34,6 +35,19 @@ public class SqlQueryBuilder : ISqlQueryBuilder
 		return this;
 	}
 
+	public ISqlQueryBuilder Join(string joinType, string table, string onCondition)
+	{
+		if (string.IsNullOrWhiteSpace(joinType) || string.IsNullOrWhiteSpace(table) || string.IsNullOrWhiteSpace(onCondition))
+			return this;
+
+		joinType = joinType.Trim().ToUpper();
+		if (joinType != "INNER" && joinType != "LEFT" && joinType != "RIGHT")
+			throw new ArgumentException("Join type must be INNER, LEFT, or RIGHT.");
+
+		_queryBuilder.AppendLine($"{joinType} JOIN {table} ON {onCondition}");	
+		return this;
+	}
+
 	public ISqlQueryBuilder Where(string condition)
 	{
 		if (!string.IsNullOrWhiteSpace(condition))
@@ -55,8 +69,31 @@ public class SqlQueryBuilder : ISqlQueryBuilder
 		return this;
 	}
 
-	public string Build()
+	public ISqlQueryBuilder GroupBy(string columns)
 	{
-		return $"SELECT {string.Join(", ", _columns)} {Environment.NewLine}{_queryBuilder.ToString().Trim()} {Environment.NewLine}{_orderByClause}".Trim();
+		if (!string.IsNullOrWhiteSpace(columns))
+		{
+			_groupByClause = $"GROUP BY {columns}";
+		}
+		return this;
+	}
+
+	public string Build(bool autoRestore = true)
+	{
+		var result = $"SELECT {string.Join(", ", _columns)} {Environment.NewLine}{_queryBuilder.ToString().Trim()} {(!string.IsNullOrEmpty(_groupByClause)?$"{Environment.NewLine}{_groupByClause}":"")} {Environment.NewLine}{_orderByClause}".Trim();
+
+		if(autoRestore)
+			Restore();
+
+		return result;
+	}
+
+	private void Restore()
+	{
+		_queryBuilder.Clear();
+		_columns.Clear();
+		_fromSet = false;
+		_orderByClause = string.Empty;
+		_groupByClause = string.Empty;
 	}
 }

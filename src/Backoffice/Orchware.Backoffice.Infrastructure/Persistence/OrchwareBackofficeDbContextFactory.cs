@@ -12,15 +12,12 @@ public class OrchwareBackofficeDbContextFactory : IDesignTimeDbContextFactory<Or
 		var basePath = Path.Combine(Directory.GetCurrentDirectory(), @"..\Orchware.Backoffice.API");
 
 		Console.WriteLine($"Environment: {environment}");
-		//Console.WriteLine($"Base Path: {basePath}");
 
 		IConfigurationRoot configuration = new ConfigurationBuilder()
 			.SetBasePath(basePath)
 			.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
 			.AddJsonFile($"appsettings.{environment}.json", optional: true)
 			.Build();
-
-		//Console.WriteLine($"Connection String: {configuration.GetConnectionString("MSSQLDbConnection")}");
 
 		var connectionString = configuration.GetConnectionString("MSSQLDbConnection");
 

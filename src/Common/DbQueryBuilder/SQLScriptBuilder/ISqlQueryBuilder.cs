@@ -6,5 +6,9 @@ public interface ISqlQueryBuilder
 	ISqlQueryBuilder From(string table);
 	ISqlQueryBuilder Where(string condition);
 	ISqlQueryBuilder OrderBy(string sorting, bool ascending = true);
-	string Build();
+
+	ISqlQueryBuilder Join(string joinType, string table, string onCondition);
+	ISqlQueryBuilder GroupBy(string columns);
+
+	string Build(bool autoRestore = true);
 }

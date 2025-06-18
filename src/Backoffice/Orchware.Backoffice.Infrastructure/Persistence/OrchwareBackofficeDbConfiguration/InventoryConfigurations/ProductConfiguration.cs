@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Orchware.Backoffice.Domain.Entities.Inventory;
+using Orchware.Backoffice.Domain.Constants;
 
 namespace Orchware.Backoffice.Infrastructure.Persistence.OrchwareBackofficeDbConfiguration.InventoryConfigurations;
 
@@ -8,7 +9,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
 	public void Configure(EntityTypeBuilder<Product> builder)
 	{
-		builder.ToTable(nameof(Product), OrchwareBackofficeDbContext.InventorySchema);
+		builder.ToTable(nameof(Product), DomainSchema.Inventory);
 
 		builder.HasKey(x => x.Id);
 

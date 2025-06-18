@@ -2,8 +2,11 @@
 using FileStorage.Enums;
 using FileStorage.FileFormatServices;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Orchware.Backoffice.Domain.Entities.Inventory;
 using Orchware.Backoffice.Domain.Enums;
+using Polly;
+using Polly.Registry;
 
 namespace Orchware.Backoffice.Infrastructure.Persistence;
 
@@ -11,55 +14,65 @@ public class OrchwareBackInitializer
 {
 	private readonly OrchwareBackofficeDbContext _context;
 	private readonly IFileServiceFactory _fileServiceFactory;
+	private ResiliencePipeline _resiliencePipeline;
+	private ILogger<OrchwareBackInitializer> _logger;
 
-	public OrchwareBackInitializer(OrchwareBackofficeDbContext context, IFileServiceFactory fileServiceFactory)
+	public OrchwareBackInitializer(OrchwareBackofficeDbContext context, IFileServiceFactory fileServiceFactory,
+		ResiliencePipelineProvider<string> pipelineProvider, ILogger<OrchwareBackInitializer> logger)
 	{
 		_context = context;
 		_fileServiceFactory = fileServiceFactory;
+		_resiliencePipeline = pipelineProvider.GetPipeline("orchware-backoffice-pipeline");
+		_logger = logger;
 	}
 
 	public async Task InitializeData()
 	{
-		await _context.Database.MigrateAsync();
-
-		if (!_context.Product.Any() && !_context.Shelf.Any())
+		await _resiliencePipeline.ExecuteAsync(async token =>
 		{
-			try
+			_logger.LogInformation("Started Database Initializer");
+
+			await _context.Database.MigrateAsync();
+
+			if (!_context.Product.Any() && !_context.Shelf.Any())
 			{
-				var shelvesTask = Task.Run(() => SafeGetDataFromFile<Shelf>($"{nameof(Shelf)}.csv"));
-				var productsTask = Task.Run(() => SafeGetDataFromFile<Product>($"{nameof(Product)}.csv"));
+				try
+				{
+					var shelvesTask = Task.Run(() => SafeGetDataFromFile<Shelf>($"{nameof(Shelf)}.csv"));
+					var productsTask = Task.Run(() => SafeGetDataFromFile<Product>($"{nameof(Product)}.csv"));
 
-				await Task.WhenAll(shelvesTask, productsTask);
+					await Task.WhenAll(shelvesTask, productsTask);
 
-				var shelves = shelvesTask.Result;
-				var products = productsTask.Result;
+					var shelves = shelvesTask.Result;
+					var products = productsTask.Result;
 
-				var winterShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Winter).ToList();
-				var springShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Spring).ToList();
-				var summerShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Summer).ToList();
+					var winterShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Winter).ToList();
+					var springShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Spring).ToList();
+					var summerShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Summer).ToList();
 
-				AssignProductsToShelves(winterShelves, products.Take(20).ToList());
+					AssignProductsToShelves(winterShelves, products.Take(20).ToList());
+					AssignProductsToShelves(springShelves, products.Skip(20).Take(20).ToList());
+					AssignProductsToShelves(summerShelves, products.Skip(41).ToList());
 
-				AssignProductsToShelves(springShelves, products.Skip(20).Take(20).ToList());
+					_context.Shelf.AddRange(shelves);
+					await _context.SaveChangesAsync();
 
-				AssignProductsToShelves(summerShelves, products.Skip(41).ToList());
-
-				_context.Shelf.AddRange(shelves);
-				await _context.SaveChangesAsync();
+					_logger.LogInformation("Database Initializer Finished Successfully");
+				}
+				catch (FileNotFoundException ex)
+				{
+					_logger.LogError("The file {MESSAGE} was not found", ex.FileName);
+				}
+				catch (DbUpdateException ex)
+				{
+					_logger.LogError(ex,"An error occurred while updating the database. Message: {MESSAGE}", ex.Message);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex,"An unexpected error occurred.");
+				}
 			}
-			catch(FileNotFoundException ex)
-			{
-				Console.WriteLine($"The file {ex.FileName} was not found in the path {Directory.GetCurrentDirectory()}");
-			}
-			catch (DbUpdateException ex)
-			{
-				Console.WriteLine("An error occurred while updating the database.", ex);
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine("An unexpected error occurred.", ex);
-			}
-		}
+		});
 	}
 
 	private List<T> SafeGetDataFromFile<T>(string filename) where T : class, new()
@@ -70,7 +83,7 @@ public class OrchwareBackInitializer
 		}
 		catch (Exception ex)
 		{
-			Console.WriteLine($"Error loading {filename}: {ex.Message}");
+			_logger.LogError(ex,"Error loading {FILENAME}: {MESSAGE}", filename, ex.Message);
 			return new List<T>();
 		}
 	}
