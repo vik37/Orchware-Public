@@ -298,3 +298,23 @@ The following improvements were added to support more dynamic and safe SQL filte
 
 - `UnsafeSqlFilterException.cs`  
   Custom exception thrown when an unsafe SQL filter is detected.
+
+  ## 🔄 Backoffice Updates
+
+### 🆕 Added API endpoints for inventory management:
+
+- `GET api/inventory/shelf/{id}` – Retrieve details of a specific shelf and its products.
+- `GET api/inventory/seasonal-fruits` – Get a list of seasonal fruits.
+- `GET api/inventory/units-of-measure` – Fetch available units of measure for products.
+- `GET api/inventory/shelf` – Get Shelf Description including brief details of the products (name and quantity) .
+
+  ## 🔄 Middleware Enhancements in Backoffice & Frontoffice
+
+### ✅ **Exception Handling Middleware**
+- **Unified Error Responses:** Both services now implement `ExceptionMiddleware` to standardize error handling.
+- **Logging & Debugging Improvements:** Middleware captures request details, headers, and correlation IDs for better troubleshooting.
+- **Supported Exceptions:** Handles **BadRequestException**, **NotFoundException**, and unexpected server errors.
+- **Consistent API Responses:** Ensures all errors return structured responses following **RFC 7807 problem+json format**.
+
+
+
