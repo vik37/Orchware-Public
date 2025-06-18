@@ -2,7 +2,7 @@
 services:
 
   orchware.frontoffice.api:
-    image: orchwarefrontofficeapi:latest
+    image: ${DOCKER_REGISTRY-}orchwarefrontofficeapi:latest
     container_name: orchware.frontoffice.api
     build:
       context: .
@@ -12,12 +12,11 @@ services:
     restart: always
     ports:
       - "8080:8080"
-      - "8081:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
 
   orchware.backoffice.api:
-    image: orchwarebackofficeapi:latest
+    image: ${DOCKER_REGISTRY-}orchwarebackofficeapi:latest
     container_name: orchware.backoffice.api
     build:
       context: .
@@ -27,9 +26,11 @@ services:
     restart: always
     ports:
       - "9090:9090"
-      - "9091:9091"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./src/Backoffice/Orchware.Backoffice.Infrastructure/Persistence/SeedFiles/Shelf.csv:/app/Persistence/SeedFiles/Shelf.csv
+      - ./src/Backoffice/Orchware.Backoffice.Infrastructure/Persistence/SeedFiles/Product.csv:/app/Persistence/SeedFiles/Product.csv
 
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -38,7 +39,7 @@ services:
       - "1433:1433"
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=your_secure_password_here
+      - MSSQL_SA_PASSWORD=aJkulAdRakula#123
     volumes:
       - mssqldata:/var/opt/mssql
 

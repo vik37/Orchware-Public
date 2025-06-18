@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Orchware.Backoffice.Domain.Constants;
 using Orchware.Backoffice.Domain.Entities.Shipping;
 
 namespace Orchware.Backoffice.Infrastructure.Persistence.OrchwareBackofficeDbConfiguration.ShipmentConfigurations;
@@ -8,7 +9,7 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
 {
 	public void Configure(EntityTypeBuilder<Shipment> builder)
 	{
-		builder.ToTable(nameof(Shipment), OrchwareBackofficeDbContext.ShippingSchema);
+		builder.ToTable(nameof(Shipment), DomainSchema.Shipping);
 
 		builder.HasKey(x => x.Id);
 

@@ -10,3 +10,12 @@ Content-Type: application/json
   "orderDirection": "ASC"
 }
 
+###
+# Get All Seasonal Fruits
+GET {{Orchware.Frontoffice.API_HostAddress}}/api/products/seasonal-fruits
+Accept: application/json
+
+###
+# Get All Units of Measure
+GET {{Orchware.Frontoffice.API_HostAddress}}/api/products/units-of-measure
+Accept: application/json

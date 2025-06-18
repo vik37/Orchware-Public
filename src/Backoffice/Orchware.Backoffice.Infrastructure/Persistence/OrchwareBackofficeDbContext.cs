@@ -10,11 +10,6 @@ namespace Orchware.Backoffice.Infrastructure.Persistence;
 
 public class OrchwareBackofficeDbContext : DbContext
 {
-	public const string DefaultSchema = "dbo";
-	public const string InventorySchema = "inventory";
-	public const string	OrderSchema = "order";
-	public const string ShippingSchema = "shipping";
-
 	public OrchwareBackofficeDbContext(DbContextOptions<OrchwareBackofficeDbContext> options)
 		: base(options){}
 

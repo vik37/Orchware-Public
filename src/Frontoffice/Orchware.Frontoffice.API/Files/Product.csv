@@ -34,11 +34,6 @@ Id,Name,SeasonalFruits,AvailableQuantity,Price,MinQuantity,Units,Image
 0,Blackberry,2,53.83,4.89,1,1,blackberry.jpg
 0,Lychee,2,98.29,7.69,1,2,lychee.jpg
 0,Guava,2,453.62,0.9,1,1,guava.jpg
-0,Spring Pear,2,191.78,9.02,5,3,spring_pear.jpg
-0,Spring Apple,2,489.87,1.59,4,2,spring_apple.jpg
-0,Spring Blackcurrant,2,385.22,3.54,1,1,spring_blackcurrant.jpg
-0,Spring Redcurrant,2,416.05,9.41,3,1,spring_redcurrant.jpg
-0,Spring Grapefruit,2,12.48,9.78,4,2,spring_grapefruit.jpg
 0,Watermelon,3,457.9,1.85,5,2,watermelon.jpg
 0,Melon,3,381.04,4.25,2,2,melon.jpg
 0,Fig,3,334.29,7.73,3,3,fig.jpg

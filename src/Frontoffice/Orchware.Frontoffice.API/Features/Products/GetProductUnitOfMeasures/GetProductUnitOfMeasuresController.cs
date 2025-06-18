@@ -18,7 +18,7 @@ public class GetProductUnitOfMeasuresController : ControllerBase
 	/// Retrieves all unit of measures as an enumerable list.
 	/// </summary>
 	/// <example>
-	///   GET api/products/unit-of-measures
+	///   GET api/products/units-of-measure
 	///   Response:
 	///   [
 	///      { "Index": 1, "Name": "g", "Fullname": "Grams" },
@@ -28,7 +28,7 @@ public class GetProductUnitOfMeasuresController : ControllerBase
 	/// </example>
 	/// <param name="cancellationToken">Cancellation token</param>
 	/// <returns>List of unit of measures with display names and fullnames</returns>
-	[HttpGet("unit-of-measures")]
+	[HttpGet("units-of-measure")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<IActionResult> Get(CancellationToken cancellationToken)
 	{
