@@ -4,8 +4,28 @@
 
 _"Limited access to the core code may mean some functionalities are not directly visible here."_
 
-## 🚧 Work in Progress  
-This project is currently in its **early development stage**. Some features are still being implemented, and the architecture may evolve. Contributions and feedback are welcome!  
+## Live Demo
+
+Orchware is a warehouse management system built using Angular (frontend) and ASP.NET (backend), containerized with Docker and deployed via GitHub Actions.  
+
+🌐 **Live app:** [https://viktor-showcase.dev/orchware](https://viktor-showcase.dev/orchware)
+
+:book: **PDF Documentation**
+[Orchware_Description.pdf](https://eu2.contabostorage.com/2efd0461225649f1ab046e9a2f8101ca:vikstr/documents/Orchware_Description.pdf)            
+A detailed description of the system's business logic, design, and development process.
+
+----
+
+## Current Status - Work in Progress 🚧 
+
+The project is actively under development and already includes key features such as:
+
+- 🛒 Frontoffice: Product browsing
+- 📦 Backoffice: Inventory management
+
+While the core architecture is in place, new features and improvements are being added continuously.  
+The app is live and fully integrated with CI/CD for real-time updates.  
+Feedback and suggestions are always welcome!
 
 📦 **Orchware System**  
 **Orchware** is a system for managing **Backoffice and Frontoffice services**, built on **.NET 8** with a focus on **clean and modular architecture**.  
