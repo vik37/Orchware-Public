@@ -16,16 +16,47 @@ A detailed description of the system's business logic, design, and development p
 
 ----
 
-## Current Status - Work in Progress 🚧 
+## 🚧 Current Status – Work in Progress
 
 The project is actively under development and already includes key features such as:
 
-- 🛒 Frontoffice: Product browsing
-- 📦 Backoffice: Inventory management
+- 🛒 **Frontoffice**: Product browsing  
+- 📦 **Backoffice**: Inventory management
 
-While the core architecture is in place, new features and improvements are being added continuously.  
-The app is live and fully integrated with CI/CD for real-time updates.  
-Feedback and suggestions are always welcome!
+The core architecture is in place, and new features are added continuously.  
+The app is live, and updates are delivered in real time via a CI/CD pipeline.
+
+💬 _Feedback and suggestions are always welcome!_
+
+![Status](https://img.shields.io/badge/status-in%20progress-yellow) ![Maintained](https://img.shields.io/badge/maintained-yes-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
+
+---
+
+### 🧱 Tech Stack
+
+![Backend](https://img.shields.io/badge/backend-.NET-512BD4?logo=dotnet) ![Frontend](https://img.shields.io/badge/frontend-Angular-DD0031?logo=angular) ![Containerized](https://img.shields.io/badge/containerized-Docker-2496ED?logo=docker) ![Proxy](https://img.shields.io/badge/reverse%20proxy-NGINX-009639?logo=nginx)
+
+---
+
+### ⚙️ Deployment & CI/CD
+
+![CI/CD](https://img.shields.io/badge/github%20actions-enabled-blue?logo=githubactions) ![Deployed](https://img.shields.io/badge/deployed-VPS%20Ubuntu-blueviolet?logo=linux) [![Live](https://img.shields.io/badge/live-demo-green?logo=googlechrome)](https://viktor-showcase.dev/orchware)
+
+---
+
+### 📊 Repository Stats
+
+**About This Repository**
+This is a public reference of the Orchware project, primarily intended for showcasing the live application and giving insight into the architecture.
+
+🔒 The core development activity (including **CI/CD** pipelines, detailed configuration, project management, and full issue tracking) is maintained in a private repository.
+
+This public version is configured slightly differently — just enough to run the app locally or explore how it works.
+The source code here is 99% identical to the private repo, with only minor adjustments made for deployment and security reasons. 
+
+![Issues](https://img.shields.io/github/issues/vik37/Orchware-Public) ![Last Commit](https://img.shields.io/github/last-commit/vik37/Orchware-Public)
+
+----------
 
 📦 **Orchware System**  
 **Orchware** is a system for managing **Backoffice and Frontoffice services**, built on **.NET 8** with a focus on **clean and modular architecture**.  
