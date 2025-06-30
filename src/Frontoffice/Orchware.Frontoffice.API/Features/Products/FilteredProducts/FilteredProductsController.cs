@@ -1,11 +1,13 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Orchware.Frontoffice.API.Common.CustomExceptions;
 using Orchware.Frontoffice.API.Common.Pagginations;
 
 namespace Orchware.Frontoffice.API.Features.Products.FilteredProducts;
 
 [Route("api/products")]
+[EnableRateLimiting("fixed-by-ip")]
 [ApiController]
 public class FilteredProductsController : ControllerBase
 {
