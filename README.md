@@ -443,6 +443,16 @@ builder.Services.AddOpenTelemetry()
 
 ------------
 
+------------
+
+### 📈 Grafana Dashboards
+📂 observability/grafana-dashboards/
+Contains exported Grafana dashboards in JSON format for:
+
+Tracing via Tempo
+
+------------
+
 
 ![File Service UML Diagram](git_docs/images/prometheus_down.png)     
 
