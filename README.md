@@ -34,8 +34,8 @@ The app is live, and updates are delivered in real time via a CI/CD pipeline.
 
 ### 🧱 Tech Stack
 
-![Backend](https://img.shields.io/badge/backend-.NET-512BD4?logo=dotnet) ![Frontend](https://img.shields.io/badge/frontend-Angular-DD0031?logo=angular) ![Containerized](https://img.shields.io/badge/containerized-Docker-2496ED?logo=docker) ![Proxy](https://img.shields.io/badge/reverse%20proxy-NGINX-009639?logo=nginx)
-
+![Backend](https://img.shields.io/badge/backend-.NET-512BD4?logo=dotnet) ![Frontend](https://img.shields.io/badge/frontend-Angular-DD0031?logo=angular) ![Containerized](https://img.shields.io/badge/containerized-Docker-2496ED?logo=docker) ![Proxy](https://img.shields.io/badge/reverse%20proxy-NGINX-009639?logo=nginx) ![Serilog](https://img.shields.io/badge/logging-Serilog-4AB197?logo=serilog&logoColor=white)
+![Seq](https://img.shields.io/badge/logging-Seq-12B886?logo=logstash) ![Tempo](https://img.shields.io/badge/tracing-Tempo-FFB300?logo=grafana) ![Prometheus](https://img.shields.io/badge/metrics-Prometheus-E6522C?logo=prometheus) ![OpenTelemetry](https://img.shields.io/badge/telemetry-OpenTelemetry-262261?logo=opentelemetry) ![Serilog](https://img.shields.io/badge/logging-Serilog-4AB197?logo=serilog&logoColor=white)
 ---
 
 ### ⚙️ Deployment & CI/CD
@@ -71,6 +71,7 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 🔹 [Common Libraries](#common-libraries)  
 🔹 [Docker Support](#docker-support)  
 🔹 [Contributing](#contributing)  
+🔹 [What's New](#news) 
 
 ---
 
@@ -138,6 +139,13 @@ This system allows fruit wholesalers to efficiently manage ordering, storage, an
 ✔ **FluentValidation** (Dto Models and Command Request Validations)  
 ✔ **CsvHelper** (CSV import/export)  
 ✔ **Docker** (containerization)  
+✔ **OpenTelemetry** (distributed tracing & metrics instrumentation)
+✔ **OTel Collector** (centralized observability pipeline)
+✔ **Seq** (structured log ingestion & visualization)
+✔ **Grafana** (dashboarding and alerting)
+✔ **Tempo** (distributed trace backend)
+✔ **Prometheus** (metrics scraping & backend)
+
 
 ---
 
@@ -367,5 +375,123 @@ The following improvements were added to support more dynamic and safe SQL filte
 - **Supported Exceptions:** Handles **BadRequestException**, **NotFoundException**, and unexpected server errors.
 - **Consistent API Responses:** Ensures all errors return structured responses following **RFC 7807 problem+json format**.
 
+# Completed Feature - 06/30/2026
+
+---
+
+## 📊 Observability (Monitoring & Tracing)
+
+The project features a complete observability stack powered by the following tools:
+
+### Logging with Seq
+
+- All `Serilog` logs from .NET services are sent to [Seq](https://datalust.co/seq) for centralized viewing.
+- Access via `http://localhost:5341/` (or `/seq/` if exposed via frontend NGINX)
+
+```csharp
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Seq(Environment.GetEnvironmentVariable("SEQ_URL")!)
+    .CreateLogger();
+```
+
+### Tracing with Grafana Tempo + OpenTelemetry Collector     
+- Distributed tracing is implemented using OpenTelemetry SDK and OTEL Collector.    
+- Traces are visualized in Grafana via Tempo as a data source.
+
+```builder.Services.AddOpenTelemetry()
+    .WithTracing(tracer =>
+    {
+        tracer
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("orchware.frontoffice.api"))
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddOtlpExporter(otlp =>
+            {
+                otlp.Endpoint = new Uri("http://otel-collector:4317");
+                otlp.Protocol = OtlpExportProtocol.Grpc;
+            });
+    });
+```
+
+### Metrics with Prometheus + Grafana     
+- .NET services emit runtime metrics such as HTTP, GC, and process stats.    
+- These metrics are collected by Prometheus and visualized in Grafana.
+
+```
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddRuntimeInstrumentation()
+            .AddAspNetCoreInstrumentation()
+            .AddMeter("Microsoft.AspNetCore.Hosting")
+            .AddOtlpExporter(o => o.Endpoint = new Uri("http://otel-collector:4318"));
+    });
+```
+
+### OpenTelemetry Collector Configuration
+The otel-collector.yaml file acts as a centralized routing and processing hub between .NET services and observability tools:
+📥 Receivers
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+
+- Accepts telemetry data from apps via OTLP, using both gRPC and HTTP protocols
+- .NET services use these endpoints to send traces and metrics
+📤 Exporters
+```
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+  otlphttp/tempo:
+    endpoint: http://tempo:4318
+    tls:
+      insecure: true
+```
+
+- Prometheus exporter exposes metrics that are scraped by Prometheus (e.g. HTTP, GC, process)
+- OTLP HTTP exporter forwards trace data to Tempo
+⚙️ Processors
+
+```
+processors:
+  batch: {}
+```
+
+- **Defines two pipelines:**
+- traces → from OTLP → to Tempo
+- metrics → from OTLP → to Prometheus
+
+ ### Rate Limiting (Sliding Window) 🚦      
+Implemented using the built-in .NET 8 rate limiter middleware:
+```builder.Services.AddRateLimiter(options =>
+{
+	options.RejectionStatusCode = 429;
+	options.AddPolicy("slide-by-ip", httpContext =>
+		RateLimitPartition.GetSlidingWindowLimiter(
+			partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+			factory: _ => new SlidingWindowRateLimiterOptions
+			{
+				PermitLimit = 400,
+				Window = TimeSpan.FromMinutes(1),
+				SegmentsPerWindow = 2,
+				QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+				QueueLimit = 1
+			}));
+	options.OnRejected = (ctx, token) =>
+	{
+		var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+		logger.LogWarning("Rate limit triggered for {IpAddress}", ctx.HttpContext.Connection.RemoteIpAddress);
+		return ValueTask.CompletedTask;
+	};
+});
+
+app.UseRateLimiter();
+```
 
 
