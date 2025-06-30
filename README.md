@@ -40,7 +40,8 @@ The app is live, and updates are delivered in real time via a CI/CD pipeline.
 
 ### ⚙️ Deployment & CI/CD
 
-![CI/CD](https://img.shields.io/badge/github%20actions-enabled-blue?logo=githubactions) ![Deployed](https://img.shields.io/badge/deployed-VPS%20Ubuntu-blueviolet?logo=linux) [![Live](https://img.shields.io/badge/live-demo-green?logo=googlechrome)](https://viktor-showcase.dev/orchware)
+![CI/CD](https://img.shields.io/badge/github%20actions-enabled-blue?logo=githubactions) ![Deployed](https://img.shields.io/badge/deployed-VPS%20Ubuntu-blueviolet?logo=linux) [![Live](https://img.shields.io/badge/live-demo-green?logo=googlechrome)](https://viktor-showcase.dev/orchware) ![Grafana](https://img.shields.io/badge/observability-enabled-brightgreen)
+
 
 ---
 
