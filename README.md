@@ -394,6 +394,12 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 ```
 
+## Example
+
+![File Service UML Diagram](git_docs/images/seq_dashboard.png)       
+
+----------------------
+
 ### Tracing with Grafana Tempo + OpenTelemetry Collector     
 - Distributed tracing is implemented using OpenTelemetry SDK and OTEL Collector.    
 - Traces are visualized in Grafana via Tempo as a data source.
@@ -428,6 +434,17 @@ builder.Services.AddOpenTelemetry()
             .AddOtlpExporter(o => o.Endpoint = new Uri("http://otel-collector:4318"));
     });
 ```
+
+## Example (Prometheus + Grafana UI)
+
+![File Service UML Diagram](git_docs/images/grafana_matrics.png)        
+
+## Example (Prometheus UI)
+
+------------
+
+
+![File Service UML Diagram](git_docs/images/prometheus_down.png)     
 
 ### OpenTelemetry Collector Configuration
 The otel-collector.yaml file acts as a centralized routing and processing hub between .NET services and observability tools:
