@@ -11,7 +11,7 @@ using Orchware.Backoffice.Application.Features.Shared.Enums;
 namespace Orchware.Backoffice.API.Controllers
 {
 	[Route("api/inventory")]
-	[EnableRateLimiting("fixed-by-ip")]
+	[EnableRateLimiting("slide-by-ip")]
 	[ApiController]
 	public class InventoryController : ControllerBase
 	{

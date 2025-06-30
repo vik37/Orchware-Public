@@ -106,13 +106,16 @@ builder.Services.AddOpenTelemetry()
 builder.Services.AddRateLimiter(options =>
 {
 	options.RejectionStatusCode = 429;
-	options.AddPolicy("fixed-by-ip", httpContext =>
-		RateLimitPartition.GetFixedWindowLimiter(
+	options.AddPolicy("slide-by-ip", httpContext =>
+		RateLimitPartition.GetSlidingWindowLimiter(
 			partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
-			factory: _ => new FixedWindowRateLimiterOptions
+			factory: _ => new SlidingWindowRateLimiterOptions
 			{
-				PermitLimit = 10,
-				Window = TimeSpan.FromMinutes(1)
+				PermitLimit = 400,
+				Window = TimeSpan.FromMinutes(1),
+				SegmentsPerWindow = 2,
+				QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+				QueueLimit = 1
 			}));
 	options.OnRejected = (ctx, token) =>
 	{
