@@ -420,10 +420,10 @@ Log.Logger = new LoggerConfiguration()
 ```
 
 ### 📈 Grafana Dashboards
-📂 observability/grafana-dashboards/      
-**Contains exported Grafana dashboards in JSON format for:**
 
-_Tracing via Tempo_
+|-  📂  ```observability/grafana-dashboards/api-dashboard.json```          
+|- **Contains exported Grafana dashboards in JSON format for:**   
+|-  _Tracing via Tempo_
 
 -----------
 
