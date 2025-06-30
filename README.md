@@ -467,6 +467,28 @@ processors:
 - traces → from OTLP → to Tempo
 - metrics → from OTLP → to Prometheus
 
+### Health Checks :heartbeat:
+
+Each API service exposes a /health endpoint for availability checks:
+
+- Example Docker health check:
+
+```
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:6060/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 5
+```
+
+- Registered in .NET with:
+```
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>();
+
+app.MapHealthChecks("/health");
+```
+
  ### Rate Limiting (Sliding Window) 🚦      
 Implemented using the built-in .NET 8 rate limiter middleware:
 ```builder.Services.AddRateLimiter(options =>
