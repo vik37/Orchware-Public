@@ -1,6 +1,70 @@
 
 services:
 
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    ports:
+      - "5341:80"
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=admin
+      - SEQ_RETENTIONPOLICIES__DEFAULTRETENTIONDAYS=7
+    volumes:
+      - seq-data:/data
+    restart: unless-stopped
+  
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    command: ["-config.file=/etc/tempo.yml"]
+    volumes:
+      - ./observ-conf/tempo.yml:/etc/tempo.yml
+    ports:
+      - "3200:3200"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observ-conf/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - '--storage.tsdb.retention.time=7d'
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./observ-conf/otel-collector-config.yml:/etc/otel-collector-config.yml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    depends_on:
+      - tempo
+      - prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - tempo
+      - prometheus
+    restart: unless-stopped
+
   orchware.frontoffice.api:
     image: ${DOCKER_REGISTRY-}orchwarefrontofficeapi:latest
     container_name: orchware.frontoffice.api
@@ -9,11 +73,21 @@ services:
       dockerfile: src/Frontoffice/Orchware.Frontoffice.API/Dockerfile
     depends_on:
       - mssql
+      - otel-collector
+      - prometheus
+      - tempo
     restart: always
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__MSSQLDbConnection=[Set your Db Connection String or Setup .ENV File (secrets)]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   orchware.backoffice.api:
     image: ${DOCKER_REGISTRY-}orchwarebackofficeapi:latest
@@ -23,14 +97,24 @@ services:
       dockerfile: src/Backoffice/Orchware.Backoffice.API/Dockerfile
     depends_on:
       - mssql
+      - otel-collector
+      - prometheus
+      - tempo
     restart: always
     ports:
-      - "9090:9090"
+      - "4040:4040"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=4040
+      - ConnectionStrings__MSSQLDbConnection=[Set your Db Connection String or Setup .ENV File (secrets)]
     volumes:
       - ./src/Backoffice/Orchware.Backoffice.Infrastructure/Persistence/SeedFiles/Shelf.csv:/app/Persistence/SeedFiles/Shelf.csv
       - ./src/Backoffice/Orchware.Backoffice.Infrastructure/Persistence/SeedFiles/Product.csv:/app/Persistence/SeedFiles/Product.csv
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4040/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -45,3 +129,5 @@ services:
 
 volumes:
   mssqldata:
+  seq-data:
+  grafana-storage:  

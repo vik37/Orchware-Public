@@ -28,51 +28,56 @@ public class OrchwareBackInitializer
 
 	public async Task InitializeData()
 	{
-		await _resiliencePipeline.ExecuteAsync(async token =>
+		var pendingMigrations = await _context.Database.GetPendingMigrationsAsync();
+
+		if (pendingMigrations.Any()) 
 		{
-			_logger.LogInformation("Started Database Initializer");
-
-			await _context.Database.MigrateAsync();
-
-			if (!_context.Product.Any() && !_context.Shelf.Any())
+			await _resiliencePipeline.ExecuteAsync(async token =>
 			{
-				try
+				_logger.LogInformation("Started Database Initializer");
+
+				await _context.Database.MigrateAsync();
+
+				if (!_context.Product.Any() && !_context.Shelf.Any())
 				{
-					var shelvesTask = Task.Run(() => SafeGetDataFromFile<Shelf>($"{nameof(Shelf)}.csv"));
-					var productsTask = Task.Run(() => SafeGetDataFromFile<Product>($"{nameof(Product)}.csv"));
+					try
+					{
+						var shelvesTask = Task.Run(() => SafeGetDataFromFile<Shelf>($"{nameof(Shelf)}.csv"));
+						var productsTask = Task.Run(() => SafeGetDataFromFile<Product>($"{nameof(Product)}.csv"));
 
-					await Task.WhenAll(shelvesTask, productsTask);
+						await Task.WhenAll(shelvesTask, productsTask);
 
-					var shelves = shelvesTask.Result;
-					var products = productsTask.Result;
+						var shelves = shelvesTask.Result;
+						var products = productsTask.Result;
 
-					var winterShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Winter).ToList();
-					var springShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Spring).ToList();
-					var summerShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Summer).ToList();
+						var winterShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Winter).ToList();
+						var springShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Spring).ToList();
+						var summerShelves = shelves.Where(s => s.SeasonalFruits == SeasonalFruits.Summer).ToList();
 
-					AssignProductsToShelves(winterShelves, products.Take(20).ToList());
-					AssignProductsToShelves(springShelves, products.Skip(20).Take(20).ToList());
-					AssignProductsToShelves(summerShelves, products.Skip(41).ToList());
+						AssignProductsToShelves(winterShelves, products.Take(20).ToList());
+						AssignProductsToShelves(springShelves, products.Skip(20).Take(20).ToList());
+						AssignProductsToShelves(summerShelves, products.Skip(41).ToList());
 
-					_context.Shelf.AddRange(shelves);
-					await _context.SaveChangesAsync();
+						_context.Shelf.AddRange(shelves);
+						await _context.SaveChangesAsync();
 
-					_logger.LogInformation("Database Initializer Finished Successfully");
+						_logger.LogInformation("Database Initializer Finished Successfully");
+					}
+					catch (FileNotFoundException ex)
+					{
+						_logger.LogError("The file {MESSAGE} was not found", ex.FileName);
+					}
+					catch (DbUpdateException ex)
+					{
+						_logger.LogError(ex, "An error occurred while updating the database. Message: {MESSAGE}", ex.Message);
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "An unexpected error occurred.");
+					}
 				}
-				catch (FileNotFoundException ex)
-				{
-					_logger.LogError("The file {MESSAGE} was not found", ex.FileName);
-				}
-				catch (DbUpdateException ex)
-				{
-					_logger.LogError(ex,"An error occurred while updating the database. Message: {MESSAGE}", ex.Message);
-				}
-				catch (Exception ex)
-				{
-					_logger.LogError(ex,"An unexpected error occurred.");
-				}
-			}
-		});
+			});
+		}
 	}
 
 	private List<T> SafeGetDataFromFile<T>(string filename) where T : class, new()

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Orchware.Backoffice.Application.Features.Inventory.Queries.GetAllFruitSeasons;
 using Orchware.Backoffice.Application.Features.Inventory.Queries.GetAllUnitsOfMeasure;
 using Orchware.Backoffice.Application.Features.Inventory.Queries.GetShelfDescriptions;
@@ -10,6 +11,7 @@ using Orchware.Backoffice.Application.Features.Shared.Enums;
 namespace Orchware.Backoffice.API.Controllers
 {
 	[Route("api/inventory")]
+	[EnableRateLimiting("fixed-by-ip")]
 	[ApiController]
 	public class InventoryController : ControllerBase
 	{
@@ -95,6 +97,7 @@ namespace Orchware.Backoffice.API.Controllers
 		/// <param name="cancellationToken">Cancellation token</param>
 		/// <returns>List of seasonal fruits with display names</returns>
 		[HttpGet("seasonal-fruits")]
+		[DisableRateLimiting]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		public async Task<IActionResult> GetAllFruitSeasons(CancellationToken cancellationToken)
 		{
@@ -116,6 +119,7 @@ namespace Orchware.Backoffice.API.Controllers
 		/// <param name="cancellationToken">Cancellation token</param>
 		/// <returns>List of unit of measures with display names and fullnames</returns>
 		[HttpGet("units-of-measure")]
+		[DisableRateLimiting]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		public async Task<IActionResult> GetAllUnitsOfMeasure(CancellationToken cancellationToken)
 		{

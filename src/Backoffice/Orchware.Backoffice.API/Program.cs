@@ -1,8 +1,14 @@
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using Orchware.Backoffice.API.Models;
 using Orchware.Backoffice.API.Pipelines.Middleware;
 using Orchware.Backoffice.Application;
 using Orchware.Backoffice.Infrastructure.Persistence;
 using Serilog;
 using System.Reflection;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +31,56 @@ builder.Services.AddSwaggerGen(opt =>
 	opt.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
 });
 
+var otelSettings = builder.Configuration.GetSection("OpenTelemetry:OtlpExporter").Get<OtelSettings>();
+
+var resourceBuilder = ResourceBuilder.CreateDefault().AddService("orchware-backoffice-api");
+
+builder.Services.AddOpenTelemetry()
+	.WithTracing(tracingProvider =>
+	{
+		tracingProvider.SetResourceBuilder(resourceBuilder)
+		.AddAspNetCoreInstrumentation()
+		.AddHttpClientInstrumentation()
+		.AddOtlpExporter(otlp =>
+		{
+			otlp.Endpoint = new Uri(otelSettings!.Endpoint);
+			otlp.Protocol = otelSettings!.Protocol.ToLower() == "grpc" ?
+												OtlpExportProtocol.Grpc : OtlpExportProtocol.HttpProtobuf;
+		});
+	})
+	.WithMetrics(matricsProvider =>
+	{
+		matricsProvider.SetResourceBuilder(resourceBuilder)
+						.AddHttpClientInstrumentation()
+						.AddHttpClientInstrumentation()
+						.AddRuntimeInstrumentation()
+						.AddOtlpExporter(otpl =>
+						{
+							otpl.Endpoint = new Uri(otelSettings!.Endpoint);
+							otpl.Protocol = otelSettings.Protocol.ToLower() == "grpc" ?
+												OtlpExportProtocol.Grpc : OtlpExportProtocol.HttpProtobuf;
+						});
+	});
+
+builder.Services.AddRateLimiter(options =>
+{
+	options.RejectionStatusCode = 429;
+	options.AddPolicy("fixed-by-ip", httpContext =>
+		RateLimitPartition.GetFixedWindowLimiter(
+			partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+			factory: _ => new FixedWindowRateLimiterOptions
+			{
+				PermitLimit = 10,
+				Window = TimeSpan.FromMinutes(1)
+			}));
+	options.OnRejected = (ctx, token) =>
+	{
+		var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+		logger.LogWarning("Rate limit triggered for {IpAddress}", ctx.HttpContext.Connection.RemoteIpAddress);
+		return ValueTask.CompletedTask;
+	};
+});
+
 builder.Services.AddCors(option =>
 {
 	option.AddPolicy("OrchwareBOPoliciesDev", policy =>
@@ -36,11 +92,16 @@ builder.Services.AddCors(option =>
 	});
 });
 
+
+builder.Services.AddHealthChecks().AddDbContextCheck<OrchwareBackofficeDbContext>();
+
 var app = builder.Build();
 
 try
 {
 	app.UseMiddleware<ExceptionMiddleware>();
+
+	app.UseHttpsRedirection();
 
 	// Configure the HTTP request pipeline.
 	if (app.Environment.IsDevelopment())
@@ -53,11 +114,13 @@ try
 
 	app.UseSerilogRequestLogging();
 
-	app.UseHttpsRedirection();
+	app.UseRateLimiter();
 
 	app.UseAuthorization();
 
 	app.MapControllers();
+
+	app.MapHealthChecks("/health");
 
 	using (var scope = app.Services.CreateScope())
 	{
@@ -69,6 +132,5 @@ try
 }
 catch (Exception ex)
 {
-	var logger = app.Services.GetRequiredService<ILogger<Program>>();
-	logger.LogError(ex, "Unhandled exception during ORCHWARE - BACKOFFICE app startup.");
+	app.Logger.LogCritical(ex, "Unhandled exception during ORCHWARE - BACKOFFICE app startup.");
 }

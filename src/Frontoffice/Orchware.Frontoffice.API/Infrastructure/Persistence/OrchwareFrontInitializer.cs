@@ -26,36 +26,41 @@ public class OrchwareFrontInitializer
 
 	public async Task InitializeData(string filePath)
 	{
-		await _resiliencePipeline.ExecuteAsync(async token =>
+		var pendingMigrations = await _context.Database.GetPendingMigrationsAsync();
+
+		if (pendingMigrations.Any())
 		{
-			try
+			await _resiliencePipeline.ExecuteAsync(async token =>
 			{
-				await _context.Database.MigrateAsync();
-
-				_logger.LogInformation("Started Database Initializer. File Path: {FILEPATH}", filePath);
-				if (!_context.Product.Any() && File.Exists(filePath))
+				try
 				{
-					var fileService = _fileServiceFactory.Create<Product, CSVFormatFileService<Product>>(FileSource.Local, FileFormat.CSV);
+					await _context.Database.MigrateAsync();
 
-					var products = await fileService.ReadFromFile(filePath);
-
-					if (products != null)
+					_logger.LogInformation("Started Database Initializer. File Path: {FILEPATH}", filePath);
+					if (!_context.Product.Any() && File.Exists(filePath))
 					{
-						await _context.Product.AddRangeAsync(products);
-						await _context.SaveChangesAsync();
-					}
-				}
+						var fileService = _fileServiceFactory.Create<Product, CSVFormatFileService<Product>>(FileSource.Local, FileFormat.CSV);
 
-				_logger.LogInformation("Database Initializer Finished Successfully");
-			}
-			catch (DbUpdateException ex)
-			{
-				_logger.LogError(ex, "An error occurred while updating the database. Message: {MESSAGE}", ex.Message);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "An unexpected error occurredduring database initialization. Message: {MESSAGE}", ex.Message);
-			}
-		});
+						var products = await fileService.ReadFromFile(filePath);
+
+						if (products != null)
+						{
+							await _context.Product.AddRangeAsync(products);
+							await _context.SaveChangesAsync();
+						}
+					}
+
+					_logger.LogInformation("Database Initializer Finished Successfully");
+				}
+				catch (DbUpdateException ex)
+				{
+					_logger.LogError(ex, "An error occurred while updating the database. Message: {MESSAGE}", ex.Message);
+				}
+				catch (Exception ex)
+				{
+					_logger.LogError(ex, "An unexpected error occurredduring database initialization. Message: {MESSAGE}", ex.Message);
+				}
+			});
+		}
 	}
 }
