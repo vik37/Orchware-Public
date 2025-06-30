@@ -419,6 +419,14 @@ Log.Logger = new LoggerConfiguration()
     });
 ```
 
+### 📈 Grafana Dashboards
+📂 observability/grafana-dashboards/      
+**Contains exported Grafana dashboards in JSON format for:**
+
+_Tracing via Tempo_
+
+-----------
+
 ### Metrics with Prometheus + Grafana     
 - .NET services emit runtime metrics such as HTTP, GC, and process stats.    
 - These metrics are collected by Prometheus and visualized in Grafana.
@@ -441,20 +449,10 @@ builder.Services.AddOpenTelemetry()
 
 ## Example (Prometheus UI)
 
-------------
 
-------------
+![File Service UML Diagram](git_docs/images/prometheus_down.png)   
 
-### 📈 Grafana Dashboards
-📂 observability/grafana-dashboards/
-Contains exported Grafana dashboards in JSON format for:
-
-Tracing via Tempo
-
-------------
-
-
-![File Service UML Diagram](git_docs/images/prometheus_down.png)     
+----------------------------
 
 ### OpenTelemetry Collector Configuration
 The otel-collector.yaml file acts as a centralized routing and processing hub between .NET services and observability tools:
