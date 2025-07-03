@@ -64,15 +64,17 @@ The source code here is 99% identical to the private repo, with only minor adjus
 It handles **inventory, orders, and shipping operations**, using modern **DDD**, **Vertical Slice Architecture**, and a **Common Library** for shared functionalities.  
 
 ## 📑 **Table of Contents**  
-🔹 [Business Overview](#business-overview)    
-🔹 [Business Logic & Order Flow](#business-logic)   
-🔹 [Technologies Used](#technologies-used)  
-🔹 [Project Structure](#project-structure)  
+🔹 [Business Overview](#-business-overview)    
+🔹 [Business Logic & Order Flow](#-cancellation--payment-rules)   
+🔹 [Technologies Used](#-cancellation--payment-rules)  
+🔹 [Project Structure](#-project-structure)  
 🔹 [Setup Instructions](#setup-instructions)  
-🔹 [Common Libraries](#common-libraries)  
-🔹 [Docker Support](#docker-support)  
-🔹 [Contributing](#contributing)  
+🔹 [Common Libraries](#-common-libraries)  
+🔹 [UML Diagram](#uml-diagram)  
+🔹 [Docker Support](#-docker-support)  
 🔹 [What's New](#news) 
+   - [Backoffice Updates](#-backoffice-updates)
+   - [Completed Feature - 06/30/2026](#completed-feature---06302026) 
 
 ---
 
@@ -172,7 +174,7 @@ src/
 
 ---
 
-## ⚙️ **Setup Instructions**  
+## Setup Instructions  
 🔹 **Prerequisites:**  
 ✅ **.NET 8 SDK**  
 ✅ **Docker** (optional, for containerized deployment)  
