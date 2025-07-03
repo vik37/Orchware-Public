@@ -67,22 +67,25 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 🔹 [Business Overview](#-business-overview)    
 🔹 [Business Logic & Order Flow](#-business-logic--order-flow)   
 🔹 [Cancellation & Payment Rules](#-cancellation--payment-rules)  
-🔹 [Technical Overview](#-technical-overview)    
+🔹 [Technical Overview](#-technical-overview)        
 🔹 [Technologies Used](#technologies-used)    
 🔹 [Project Structure](#-project-structure)  
 🔹 [Setup Instructions](#setup-instructions)  
-🔹 [Quick Start](#-quick-start)
+🔹 [Quick Start](#-quick-start)    
 🔹 [Common Libraries](#-common-libraries)  
 🔹 [UML Diagram](#uml-diagram)  
 🔹 [Docker Support](#-docker-support)  
-🔹 [Upcoming Features](#-upcoming-features) 
+🔹 [Upcoming Features](#-upcoming-features)    
 🔹 [Additional Context](#additional-context)  
 🔹 [Articles & Publications](#articles--publications)  
 🔹 [License](#license)  
-🔹 [What's New](#news) 
-   - [Backoffice Updates](#-backoffice-updates)
-   - [Completed Feature - 06/30/2026](#completed-feature---06302026) 
-
+| 🔹 [What's New](#news)                                                               |
+|--------------------------------------------------------------------------------------|
+|   :arrow_right_hook: [Backoffice Updates](#-backoffice-updates)                      |
+|======================================================================================|
+|   :arrow_right_hook: [Completed Feature - 06/30/2026](#completed-feature---06302026) |
+|======================================================================================|
+----------------------------------------------------------------------------------------
 ---
 
 ## 📌 **Business Overview**
@@ -98,10 +101,10 @@ This system allows fruit wholesalers to efficiently manage ordering, storage, an
 
 ## 🚀 Business Logic & Order Flow
 
-### 👤 Roles in Orchware        
-📌 Manager: Oversees customer orders, inventory shortages, payment tracking, and approvals.  
-📌 Warehouseman: Packs, loads, and ensures shipments are prepared for transport.      
-🛠 Order Lifecycle & Statuses    
+### 👤 $${\color{green} Roles \space in \space Orchware}$$        
+> Manager: Oversees customer orders, inventory shortages, payment tracking, and approvals.  
+> Warehouseman: Packs, loads, and ensures shipments are prepared for transport.      
+> Order Lifecycle & Statuses    
 
 1️⃣ Customer selects products → Pending Order
 
@@ -127,13 +130,13 @@ This system allows fruit wholesalers to efficiently manage ordering, storage, an
 
 ## 📋 **Technical Overview**  
 
-### **Backoffice**  
+### - $${\color{red}Backoffice}$$  
 ✅ Built using **Clean Architecture** and **Domain-Driven Design (DDD)** principles.  
 ✅ Manages entities like **Products, Shelves, Orders**.  
 ✅ Supports **database seeding, migrations, and file storage**.  
 ✅ Uses **Entity Framework Core, Dapper** as ORM.  
 
-### **Frontoffice**  
+### - $${\color{red}Frontoffice}$$ 
 ✅ Built with **Vertical Slice Architecture** for modularity.  
 ✅ Focused on exposing **product API (GET/Pagination/Filters)**.  
 ✅ Uses **Entity Framework Cor & Dapper** for efficient database access.  
@@ -326,10 +329,10 @@ Orchware is architected around modular services to balance clarity, maintainabil
 
 This system does **not** follow a strict microservices architecture to keep deployment and management simple for portfolio use. However, it demonstrates:
 
-- 🔹 **Event-driven readiness** (modular, publish-subscribe structure)  
-- 🔹 **Scalable design patterns** (Clean Architecture, separation of concerns)  
-- 🔹 **Cloud-deployable structure** (Docker + GitHub Actions CI/CD)  
-- 🔹 **Real-world tech stack** combining Angular, .NET, Dapper, EF Core, and OpenTelemetry
+- **Event-driven readiness** (modular, publish-subscribe structure)  
+- **Scalable design patterns** (Clean Architecture, separation of concerns)  
+- **Cloud-deployable structure** (Docker + GitHub Actions CI/CD)  
+- **Real-world tech stack** combining Angular, .NET, Dapper, EF Core, and OpenTelemetry
 
 The goal is to present a **production-like, modular system** suitable for real-world scenarios and job demonstration.
   
@@ -364,7 +367,7 @@ The following improvements were added to support more dynamic and safe SQL filte
   ### 🔐 Permissions Layer
 
 - `IFieldPermissionProvider.cs`  
-  Interface that defines which fields and conditions are allowed to be used in the `WHERE` clause.
+  An interface that defines which fields and conditions are allowed to be used in the `WHERE` clause.
 
 - `SqlExpressionValidator.cs`  
   Validates `FilterKeyValue` objects against defined permissions.  
@@ -374,7 +377,7 @@ The following improvements were added to support more dynamic and safe SQL filte
   ➕ **Combining `Filter`, `MultiFilter`, and `SearchTerm` is now fully supported and secure**
 
 - `UnsafeSqlFilterException.cs`  
-  Custom exception thrown when an unsafe SQL filter is detected.
+  A custom exception is thrown when an unsafe SQL filter is detected.
 
   ## 🔄 Backoffice Updates
 
