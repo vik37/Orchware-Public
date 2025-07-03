@@ -65,13 +65,20 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 
 ## 📑 **Table of Contents**  
 🔹 [Business Overview](#-business-overview)    
-🔹 [Business Logic & Order Flow](#-cancellation--payment-rules)   
-🔹 [Technologies Used](#-cancellation--payment-rules)  
+🔹 [Business Logic & Order Flow](#-business-logic--order-flow)   
+🔹 [Cancellation & Payment Rules](#-cancellation--payment-rules)  
+🔹 [Technical Overview](#-technical-overview)    
+🔹 [Technologies Used](#technologies-used)    
 🔹 [Project Structure](#-project-structure)  
 🔹 [Setup Instructions](#setup-instructions)  
+🔹 [Quick Start](#-quick-start)
 🔹 [Common Libraries](#-common-libraries)  
 🔹 [UML Diagram](#uml-diagram)  
 🔹 [Docker Support](#-docker-support)  
+🔹 [Upcoming Features](#-upcoming-features) 
+🔹 [Additional Context](#additional-context)  
+🔹 [Articles & Publications](#articles--publications)  
+🔹 [License](#license)  
 🔹 [What's New](#news) 
    - [Backoffice Updates](#-backoffice-updates)
    - [Completed Feature - 06/30/2026](#completed-feature---06302026) 
@@ -110,7 +117,7 @@ This system allows fruit wholesalers to efficiently manage ordering, storage, an
 
 7️⃣ Customer receives order → Completed
 
-## 🚨 Cancellation & Payment Rules:   
+## 🚨 **Cancellation & Payment Rules**:   
 
 ❌ Orders can be canceled before loading into transport unless payment is delayed.       
 ✅ Customers must pay within 3 days or provide a guarantee; otherwise, the shipment is canceled.
@@ -134,7 +141,7 @@ This system allows fruit wholesalers to efficiently manage ordering, storage, an
 
 ---
 
-## 🛠️ **Technologies Used**  
+## Technologies Used
 ✔ **.NET 8**  
 ✔ **Entity Framework Core** (ORM)  
 ✔ **Dapper** (ORM)
@@ -292,32 +299,40 @@ var query = new SqlQueryBuilder()
 
 ---
 
-### 🚀 Upcoming Features  
-- **Notification Service** – Currently in early development. Will handle **event tracking and real-time notifications** via SignalR.  
-- **Email Service or Azure Integration** – Planned but not yet started.  
-- **Frontend with Angular** – The system will have an Angular-based UI for interacting with Backoffice and Frontoffice APIs.   
-- **Keycloak for Authentication & Authorization** – Planned integration for secure **identity management**.  
+## 🚀 Upcoming Features  
+- **Notification Service** – Currently under development. It will handle **event tracking and real-time updates** using **SignalR**.  
+- **Email Service / Azure Integration** – Planned for future implementation. This includes potential use of **Azure Functions**, **Logic Apps**, or **SendGrid**.  
+- **Keycloak Integration** – Upcoming for secure **authentication and authorization** with **OpenID Connect**.  
+
+✅ **Angular Frontend** – Already developed and deployed as a responsive UI, fully integrated with the Backoffice and Frontoffice APIs.  
+🔗 [Live Demo](https://viktor-showcase.dev/orchware)
+
+📄 [📘 PDF Documentation](https://eu2.contabostorage.com/2efd0461225649f1ab046e9a2f8101ca:vikstr/documents/Orchware_Description.pdf)  
+_Complete overview of system features, architecture, and development process._
  
 ---
 
-### Why is this not a microservices or monolyth architecture?  
+## Additional Context
 
-This project currently consists of two services:  
-- **Backoffice** service  
-- **Frontoffice** service  
+### Why is this not a microservices or monolithic architecture?
 
-A **Notification Service** is planned as an intermediary to handle event tracking and send real-time notifications via **SignalR** to the frontend. Additionally, there is potential for an **Email Service** or integration with **Azure Services**, such as:  
-- **Azure Functions**  
-- **Logic Apps**  
-- **Azure Blob Storage** for file management  
+Orchware is architected around modular services to balance clarity, maintainability, and future extensibility:
 
-The reason this project does **not** follow a microservices architecture is that its primary goal is to be part of my portfolio for job applications a production-ready system, but I don't expect high volume of users. However, microservices offer several advantages, such as:  
-- **Scalability** – Each service can scale independently based on demand  
-- **Technology Flexibility** – Different services can use different tech stacks without dependencies  
-- **Fault Isolation** – Failure in one service does not necessarily impact the entire system  
+- **Backoffice** – Handles business operations like product and order management (EF Core + Clean Architecture + DDD)  
+- **Frontoffice** – Optimized read-only API for product data (Dapper + Vertical Slice Architecture)  
+- **Frontend** – Angular-based UI deployed and publicly available  
+- **Notification Service** – In progress (SignalR for real-time notifications)  
+- **Email Service / Azure Integration** – Planned additions (Azure Functions, Logic Apps, etc.)
 
-Despite not being a full monolithic structure, this project follows a **modular approach**, allowing me to demonstrate expertise in **event-driven architecture, cloud-based solutions, and multi-service interaction**. This strategy showcases a practical application of modern system design while maintaining simplicity for portfolio purposes.  
+This system does **not** follow a strict microservices architecture to keep deployment and management simple for portfolio use. However, it demonstrates:
 
+- 🔹 **Event-driven readiness** (modular, publish-subscribe structure)  
+- 🔹 **Scalable design patterns** (Clean Architecture, separation of concerns)  
+- 🔹 **Cloud-deployable structure** (Docker + GitHub Actions CI/CD)  
+- 🔹 **Real-world tech stack** combining Angular, .NET, Dapper, EF Core, and OpenTelemetry
+
+The goal is to present a **production-like, modular system** suitable for real-world scenarios and job demonstration.
+  
 ## Articles & Publications
 
 - [System Designed from My Own Experience](https://www.linkedin.com/pulse/system-designed-from-my-own-experience-viktor-zafirovski-ez7wf) – An article where I share insights on software system design based on real-world experience.
