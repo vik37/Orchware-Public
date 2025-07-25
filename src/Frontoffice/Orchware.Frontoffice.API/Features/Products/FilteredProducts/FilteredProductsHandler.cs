@@ -40,13 +40,11 @@ public class FilteredProductsHandler : IRequestHandler<
 		parameters.Add("@OrderDirection", !string.IsNullOrEmpty(request.Filter.OrderDirection) ? request.Filter.OrderDirection : "ASC");
 		parameters.Add("@SearchTerm", request.Filter.Search ?? "");
 		
-
 		if(request.Filter.MultyFilter is not null)
 		{
 			string whereClause = SqlFilterHelper.BuildSafeWhereClause(request.Filter.MultyFilter);
 			parameters.Add("@MultiFilter", whereClause);
 		}
-
 
 		var (total, items) = await _dapperContext.ExecutePagedProcedureAsync<Product>("ProductPaginationFilter", parameters);
 

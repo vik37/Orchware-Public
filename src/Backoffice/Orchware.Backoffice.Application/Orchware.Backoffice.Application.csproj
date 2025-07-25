@@ -15,12 +15,11 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\..\Common\DbQueryBuilder\DbQueryBuilder.csproj" />
     <ProjectReference Include="..\..\Common\Utilities\Utilities.csproj" />
     <ProjectReference Include="..\Orchware.Backoffice.Domain\Orchware.Backoffice.Domain.csproj" />
   </ItemGroup>
-  
 
 </Project>

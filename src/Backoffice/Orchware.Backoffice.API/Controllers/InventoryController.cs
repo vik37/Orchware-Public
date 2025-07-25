@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Orchware.Backoffice.Application.Features.Inventory.Queries.GetAllFruitSeasons;
@@ -12,6 +13,7 @@ namespace Orchware.Backoffice.API.Controllers
 {
 	[Route("api/inventory")]
 	[EnableRateLimiting("slide-by-ip")]
+	[Authorize(Roles = "manager, warehouseman")]
 	[ApiController]
 	public class InventoryController : ControllerBase
 	{

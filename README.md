@@ -45,6 +45,107 @@ The app is live, and updates are delivered in real time via a CI/CD pipeline.
 
 ---
 
+### Authentication & Authorization (Keycloak Integration)
+
+This project leverages robust **Authentication and Authorization** mechanisms to secure its services and manage user access. For this purpose, I've chosen to implement **Keycloak**, an open-source Identity and Access Management solution, primarily for its capabilities in providing **Single Sign-On (SSO)** across various applications.
+
+To simplify setup and demonstrate the system's security features, you can easily import the pre-configured Keycloak Realm.
+
+#### Quick Keycloak Setup:
+
+1.  **Start Keycloak:** Ensure your Keycloak instance is running (e.g., via Docker Compose).
+2.  **Import Realm Configuration:**
+    * Navigate to your Keycloak Admin Console (e.g., `http://localhost:8080/admin`).
+    * Click on **"Add Realm"** (or **"Create Realm"**).
+    * Select the **"Import realm"** option and upload the `keycloak-config/orchware-dev-realm.json` file from this repository.
+
+    **📺 For a step-by-step visual guide on importing the JSON, watch this video:**
+    [Import JSON file to Keycloak example](http://www.youtube.com/watch?v=XpHxA46w9F4)
+ 
+    - File location: `keycloak_json/realm-export.json`
+
+**Important Notes for Keycloak Setup:**
+
+* **Users:** The JSON import **does not include existing user accounts**. After importing the Realm, you will need to manually create any users you wish to use for testing purposes within the Keycloak Admin Console.
+    * **For quick testing, you can create the following demo users with pre-defined roles:**
+        * **manager:**
+            * Username: `manager@orchware.com`
+            * Password: `manDemo123!`
+            * Roles: Ensure this user is assigned the `manager` role (and potentially `user` if needed for general access).
+        * **warehouseman:**
+            * Username: `warehouse@orchware.com`
+            * Password: `Whouseman123!`
+            * Roles: Ensure this user is assigned the `warehouseman` role (and potentially `user`).
+        * **(Optional) Regular User:**
+            * **You can register a new user directly through the application's UI.** Any new user registered this way will automatically be assigned the `user` role.
+
+* **Client Secrets:** For security reasons, `clientSecret` values for confidential clients (like the `orchware-frontoffice-api` backend) are **not included** in the imported JSON. After the import:
+    1.  Go to `Clients` in the Keycloak Admin Console.
+    2.  Select your backend client (e.g., `orchware-frontoffice-api`).
+    3.  Navigate to the **`Credentials`** tab.
+    4.  Click **`Generate new secret`** and copy the newly generated secret.
+    5.  **Update your backend's configuration** (e.g., `appsettings.Development.json` or environment variables in `docker-compose.yml`) with this new `clientSecret` to ensure your backend can authenticate with Keycloak.
+
+#### Authorization Policies in Backend (.NET)
+
+The backend (`Orchware.Frontoffice.API`) implements custom authorization policies to manage access based on user roles from Keycloak. A key example is the `NonEmployeeUser` policy:
+
+```csharp
+builder.Services.AddAuthorization(opt => {
+    opt.AddPolicy("NonEmployeeUser", policy =>
+    {
+        policy.RequireAssertion(ctx =>
+        {
+            var roles = ctx.User.FindAll(ClaimTypes.Role).Select(r => r.Value);
+            var hasUserRole = roles.Contains("user");
+            var isEmployee = roles.Any(r => new[] { "manager", "warehouseman" }.Contains(r));
+
+            return hasUserRole && !isEmployee;
+        });
+    });
+});
+```     
+
+### Keycloak Configuration Example for Production
+
+For production, Keycloak typically runs behind a reverse proxy (like NGINX or Traefik) that handles HTTPS/SSL termination. The Keycloak `command` and environment variables need to reflect this.
+
+Here’s an example of how the Keycloak service within your `docker-compose.yml` might look for a production setup:
+
+```yaml
+keycloak:
+  image: quay.io/keycloak/keycloak:24.0 # Or your specific production image
+  container_name: keycloak # Or a more descriptive name
+  command: start # Important: Use 'start' for production, not 'start-dev'
+  environment:
+    KC_DB: postgres
+    KC_DB_URL_HOST: your-production-db-host # Point to your external production DB
+    KC_DB_URL_DATABASE: keycloak
+    KC_DB_USERNAME: keycloak
+    KC_DB_PASSWORD: your-secure-db-password! # Use a strong, secure password
+    KEYCLOAK_ADMIN: admin
+    KEYCLOAK_ADMIN_PASSWORD: your-secure-admin-password! # Use a strong, secure password
+    KC_HTTP_ENABLED: false # Keycloak listens for HTTP but expects a proxy to handle HTTPS
+    KC_HOSTNAME: auth.your-domain.com # Replace with your actual authentication subdomain
+    KC_PROXY: edge # Tells Keycloak it's behind a reverse proxy
+    # Add other production-specific environment variables as needed
+  # ports: # Do NOT expose ports directly to host in production; let proxy handle it
+  #   - "8080:8080" # Remove or comment out this line in production
+  # volumes: # Adjust volumes for persistent data and backups
+  #   - keycloak_data:/opt/keycloak/data
+  # depends_on: # If using an external DB, this might change
+  #   keycloak-db:
+  #     condition: service_healthy
+  restart: unless-stopped # Ensure Keycloak restarts if it crashes
+  ```
+
+🔐 Authentication is handled by Keycloak:  
+[https://auth.viktor-showcase.dev](https://auth.viktor-showcase.dev)  
+_(Admin access is not publicly exposed)_
+
+
+---
+
 ### 📊 Repository Stats
 
 **About This Repository**

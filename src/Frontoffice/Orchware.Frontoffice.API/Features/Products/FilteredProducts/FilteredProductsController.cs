@@ -7,8 +7,8 @@ using Orchware.Frontoffice.API.Common.Pagginations;
 namespace Orchware.Frontoffice.API.Features.Products.FilteredProducts;
 
 [Route("api/products")]
-[EnableRateLimiting("slide-by-ip")]
 [ApiController]
+[EnableRateLimiting("slide-by-ip")]
 public class FilteredProductsController : ControllerBase
 {
 	private readonly IMediator _mediator;

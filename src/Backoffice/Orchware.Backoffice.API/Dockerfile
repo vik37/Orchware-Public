@@ -32,4 +32,5 @@ RUN dotnet publish "./Orchware.Backoffice.API.csproj" -c $BUILD_CONFIGURATION -o
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY ./src/Backoffice/Orchware.Backoffice.Infrastructure/Persistence/SeedFiles ./Orchware.Backoffice.Infrastructure/Persistence/SeedFiles
 ENTRYPOINT ["dotnet", "Orchware.Backoffice.API.dll"]
