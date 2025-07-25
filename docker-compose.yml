@@ -1,6 +1,39 @@
 
 services:
 
+  keycloak-db:
+    image: postgres:15
+    container_name: keycloak-db
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: psgDemo123#
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "keycloak"]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: psgDemo123#
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin123
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
   seq:
     image: datalust/seq:latest
     container_name: seq
@@ -76,13 +109,15 @@ services:
       - otel-collector
       - prometheus
       - tempo
+      - keycloak
     restart: always
     ports:
-      - "8080:8080"
+      - "5050:5050"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
-      - ConnectionStrings__MSSQLDbConnection=[Set your Db Connection String or Setup .ENV File (secrets)]
+      - ASPNETCORE_HTTP_PORTS=5050
+      - ConnectionStrings__MSSQLDbConnection=Server=mssql;Database=FrontOfficeDb;User Id=sa;Password=Test123#;TrustServerCertificate=True;MultipleActiveResultSets=True
+      - Authentication__MetadataAudience=http://keycloak:8080/realms/orchware-dev/.well-known/openid-configuration
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -100,13 +135,16 @@ services:
       - otel-collector
       - prometheus
       - tempo
+      - keycloak
     restart: always
     ports:
       - "4040:4040"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=4040
-      - ConnectionStrings__MSSQLDbConnection=[Set your Db Connection String or Setup .ENV File (secrets)]
+      - ConnectionStrings__MSSQLDbConnection=Server=mssql;Database=BackOfficeDb;User Id=sa;Password=Test123#;TrustServerCertificate=True;MultipleActiveResultSets=True
+      - Authentication__ClientSecrets=jU3DxNY54vjzr7DZjPTUnDQicoYU4pVx
+      - Authentication__MetadataAudience=http://keycloak:8080/realms/orchware-dev/.well-known/openid-configuration
     volumes:
       - ./src/Backoffice/Orchware.Backoffice.Infrastructure/Persistence/SeedFiles/Shelf.csv:/app/Persistence/SeedFiles/Shelf.csv
       - ./src/Backoffice/Orchware.Backoffice.Infrastructure/Persistence/SeedFiles/Product.csv:/app/Persistence/SeedFiles/Product.csv
@@ -123,11 +161,12 @@ services:
       - "1433:1433"
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=aJkulAdRakula#123
+      - MSSQL_SA_PASSWORD=Test123#
     volumes:
       - mssqldata:/var/opt/mssql
 
 volumes:
   mssqldata:
   seq-data:
-  grafana-storage:  
+  grafana-storage:
+  keycloak_db_data:  

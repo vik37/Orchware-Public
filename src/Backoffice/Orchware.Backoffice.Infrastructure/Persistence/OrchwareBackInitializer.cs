@@ -38,7 +38,7 @@ public class OrchwareBackInitializer
 
 				await _context.Database.MigrateAsync();
 
-				if (!_context.Product.Any() && !_context.Shelf.Any())
+				if (await ShouldInitializeDatabaseAsync())
 				{
 					try
 					{
@@ -129,5 +129,13 @@ public class OrchwareBackInitializer
 			if (productIndex >= products.Count)
 				break;
 		}
+	}
+
+	private async Task<bool> ShouldInitializeDatabaseAsync(CancellationToken token = default)
+	{
+		var hasProducts = await _context.Product.AsNoTracking().AnyAsync(token);
+		var hasShelves = await _context.Shelf.AsNoTracking().AnyAsync(token);
+
+		return !hasProducts && !hasShelves;
 	}
 }

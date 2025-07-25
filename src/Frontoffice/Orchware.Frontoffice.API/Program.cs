@@ -2,26 +2,21 @@ using DbQueryBuilder;
 using FileStorage;
 using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using Orchware.Frontoffice.API.Common.Configurations;
+using Orchware.Frontoffice.API.Common.Contracts;
 using Orchware.Frontoffice.API.Common.Middleware;
-using Orchware.Frontoffice.API.Common.Models;
 using Orchware.Frontoffice.API.Common.Pipeline;
+using Orchware.Frontoffice.API.Infrastructure.Identity;
 using Orchware.Frontoffice.API.Infrastructure.Persistence;
 using Orchware.Frontoffice.API.Infrastructure.Persistence.Dapper;
 using Serilog;
 using System.Reflection;
-using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, logger) => 
 							logger.WriteTo.Console()
-											.ReadFrom.Configuration(context.Configuration));
+									.ReadFrom.Configuration(context.Configuration));
 
 var env = Environment.CurrentDirectory;
 
@@ -30,31 +25,18 @@ var env = Environment.CurrentDirectory;
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<DapperContext>();
 
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddMediatR(conf => conf.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
-builder.Services.AddDbContext<OrchwareDbContext>(opt =>
-{
-	var connectionString = builder.Configuration.GetConnectionString("MSSQLDbConnection")
-		?? throw new InvalidOperationException("Connection string not found!");
-
-	opt.UseSqlServer(connectionString, sqlOptions =>
-	{
-		sqlOptions.EnableRetryOnFailure(
-			maxRetryCount: 5,
-			maxRetryDelay: TimeSpan.FromSeconds(5),
-			errorNumbersToAdd: null
-		);
-
-		sqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-	});
-});
-
-builder.Services.AddPollyRegistrations();
+builder.Services
+	.AddAuthRegistration(builder.Configuration)
+	.AddCorsRegistration()
+	.AddDatabaseRegistration(builder.Configuration)
+	.AddOpenTelemetryRegistration(builder.Configuration)
+	.AddPollyRegistrations()
+	.AddRateLimmiterRegistration()
+	.AddSwaggerRegistration(builder.Configuration);
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>),typeof(ValidatorBehavior<,>));
@@ -62,81 +44,12 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>),typeof(ValidatorBehav
 builder.Services.AddFileServices();
 builder.Services.AddDbQueryBuilder<OrchwareFrontofficeFieldPremmisionProvider>();
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserContextService, UserContextService>();
+
 builder.Services.AddScoped<OrchwareFrontInitializer>();
 
-builder.Services.AddSwaggerGen(opt =>
-{
-	var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-	var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-
-	opt.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
-});
-
-var otelSettings = builder.Configuration.GetSection("OpenTelemetry:OtlpExporter").Get<OtelSettings>();
-
-var resourceBuilder = ResourceBuilder.CreateDefault().AddService("orchware-frontoffice-api");
-
-builder.Services.AddOpenTelemetry()
-	.WithTracing(tracingProvider =>
-	{
-		tracingProvider.SetResourceBuilder(resourceBuilder)
-		.AddAspNetCoreInstrumentation()
-		.AddHttpClientInstrumentation()
-		.AddOtlpExporter(otlp =>
-		{
-			otlp.Endpoint = new Uri(otelSettings!.Endpoint);
-			otlp.Protocol = otelSettings!.Protocol.ToLower() == "grpc" ?
-												OtlpExportProtocol.Grpc : OtlpExportProtocol.HttpProtobuf;
-		});
-	})
-	.WithMetrics(matricsProvider =>
-	{
-		matricsProvider.SetResourceBuilder(resourceBuilder)
-						.AddHttpClientInstrumentation()
-						.AddHttpClientInstrumentation()
-						.AddRuntimeInstrumentation()
-						.AddOtlpExporter(otpl =>
-						{
-							otpl.Endpoint = new Uri(otelSettings!.Endpoint);
-							otpl.Protocol = otelSettings.Protocol.ToLower() == "grpc" ?
-												OtlpExportProtocol.Grpc : OtlpExportProtocol.HttpProtobuf;
-						});
-	});
-
-builder.Services.AddRateLimiter(options =>
-{
-	options.RejectionStatusCode = 429;
-	options.AddPolicy("slide-by-ip", httpContext =>
-		RateLimitPartition.GetSlidingWindowLimiter(
-			partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
-			factory: _ => new SlidingWindowRateLimiterOptions
-			{
-				PermitLimit = 400,
-				Window = TimeSpan.FromMinutes(1),
-				SegmentsPerWindow = 2,
-				QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-				QueueLimit = 1
-			}));
-	options.OnRejected = (ctx, token) =>
-	{
-		var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-		logger.LogWarning("Rate limit triggered for {IpAddress}", ctx.HttpContext.Connection.RemoteIpAddress);
-		return ValueTask.CompletedTask;
-	};
-});
-
-builder.Services.AddCors(option =>
-{
-	option.AddPolicy("OrchwareFOPoliciesDev", policy =>
-	{
-		policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
-			 .AllowAnyHeader()
-			 .AllowAnyMethod()
-			 .AllowCredentials();
-	});
-});
-
-builder.Services.AddHealthChecks().AddDbContextCheck<OrchwareDbContext>();
+ILogger<Program>? logger = null;
 
 var app = builder.Build();
 
@@ -144,21 +57,25 @@ try
 {
 	app.UseMiddleware<ExceptionMiddleware>();
 
+	app.UseHttpsRedirection();
+
 	// Configure the HTTP request pipeline.
 	if (app.Environment.IsDevelopment())
 	{
 		app.UseSwagger();
-		app.UseSwaggerUI();
+		app.UseSwaggerUI(opt =>
+		{
+			opt.OAuthClientId(builder.Configuration["Authentication:ClientId"]);
+			opt.OAuthUsePkce();
+		});
+		app.UseCors("OrchwareFOPoliciesDev");
 	}
-
-	app.UseCors("OrchwareFOPoliciesDev");
 
 	app.UseSerilogRequestLogging();
 
-	app.UseHttpsRedirection();
-
 	app.UseRateLimiter();
 
+	app.UseAuthentication();
 	app.UseAuthorization();
 
 	app.MapControllers();
@@ -173,10 +90,10 @@ try
 		string filePath = Path.Combine(app.Environment.ContentRootPath, "Files", "Product.csv");
 		await initializer.InitializeData(filePath);
 	}
-
 	app.Run();
 }
 catch (Exception ex)
 {
-	app.Logger.LogError(ex, "Unhandled exception during ORCHWARE - FRONTOFFICE app startup.");
+	logger?.LogCritical(ex, "Unhandled exception during ORCHWARE - FRONTOFFICE app startup.");
+	throw;
 }

@@ -1,16 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Orchware.Frontoffice.API.Common.Contracts;
-using System.Diagnostics;
+using Orchware.Backoffice.Application.Features.Shared.Contract.Identity;
 
-namespace Orchware.Frontoffice.API.Features
+namespace Orchware.Backoffice.API.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
 	public class TestController : ControllerBase
 	{
-		private static readonly ActivitySource activitySource = new("orchware-frontoffice-api");
-
 		private readonly IUserContextService _userContextService;
 
 		public TestController(IUserContextService userContextService)
@@ -18,18 +15,8 @@ namespace Orchware.Frontoffice.API.Features
 			_userContextService = userContextService;
 		}
 
-		[HttpGet("trace-test")]
-		public IActionResult TraceTest()
-		{
-			using var activity = activitySource.StartActivity("ManualTestTrace");
-
-			activity?.SetTag("custom.tag", "test_value");
-
-			return Ok("Manual span sent");
-		}
-
 		[HttpGet("user")]
-		[Authorize(Policy = "NonEmployeeUser")]
+		//[Authorize(Roles = "user")]
 		public IActionResult UserTest()
 		{
 			var user = new
@@ -38,7 +25,8 @@ namespace Orchware.Frontoffice.API.Features
 				Username = _userContextService.UserName,
 				Email = _userContextService.Email,
 				Firtname = _userContextService.Firstname,
-				Lastname = _userContextService.Lastname
+				Lastname = _userContextService.Lastname,
+				Role = _userContextService.Role
 			};
 
 			return Ok(user);

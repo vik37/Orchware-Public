@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Orchware.Backoffice.Application.Features.Shared.Contract.Identity;
+using Orchware.Backoffice.Infrastructure.Identity.Services;
 using Polly;
 using Polly.Retry;
 
@@ -11,8 +13,6 @@ public static class PersistenceServiceRegistration
 {
 	public static IServiceCollection AddPersistenceServices(this IServiceCollection services, IConfiguration configuration)
 	{
-		var connection = configuration.GetConnectionString("MSSQLDbConnection");
-
 		services.AddDbContext<OrchwareBackofficeDbContext>(opt =>
 		{
 			opt.UseSqlServer(configuration.GetConnectionString("MSSQLDbConnection"),
@@ -50,6 +50,7 @@ public static class PersistenceServiceRegistration
 				.AddTimeout(TimeSpan.FromSeconds(10));
 		});
 
+		services.AddScoped<IUserContextService, UserContextService>();
 
 		return services;
 	}
