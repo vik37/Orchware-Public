@@ -64,9 +64,6 @@ To simplify setup and demonstrate the system's security features, you can easily
  
     - File location: `keycloak_json/realm-export.json`
 
-**Important Notes for Keycloak Setup:**
-
-* **Users:** The JSON import **does not include existing user accounts**. After importing the Realm, you will need to manually create any users you wish to use for testing purposes within the Keycloak Admin Console.
     * **For quick testing, you can create the following demo users with pre-defined roles:**
         * **manager:**
             * Username: `manager@orchware.com`
@@ -79,12 +76,8 @@ To simplify setup and demonstrate the system's security features, you can easily
         * **(Optional) Regular User:**
             * **You can register a new user directly through the application's UI.** Any new user registered this way will automatically be assigned the `user` role.
 
-* **Client Secrets:** For security reasons, `clientSecret` values for confidential clients (like the `orchware-frontoffice-api` backend) are **not included** in the imported JSON. After the import:
-    1.  Go to `Clients` in the Keycloak Admin Console.
-    2.  Select your backend client (e.g., `orchware-frontoffice-api`).
-    3.  Navigate to the **`Credentials`** tab.
-    4.  Click **`Generate new secret`** and copy the newly generated secret.
-    5.  **Update your backend's configuration** (e.g., `appsettings.Development.json` or environment variables in `docker-compose.yml`) with this new `clientSecret` to ensure your backend can authenticate with Keycloak.
+* **Important Notes for Keycloak Setup:**
+       - **Users and Client Secrets:** When exporting and then importing Keycloak Realm JSON, user accounts and client secrets _(confidential clients)_ are not included. They need to be added manually, as shown in the video. _(I'm not fully certain why this is the default behavior or if there's a specific export option to include them, and it's something I plan to investigate further.)_
 
 #### Authorization Policies in Backend (.NET)
 
@@ -139,7 +132,7 @@ keycloak:
   restart: unless-stopped # Ensure Keycloak restarts if it crashes
   ```
 
-🔐 Authentication is handled by Keycloak:  
+### 🔐 Authentication is handled by Keycloak:  
 [https://auth.viktor-showcase.dev](https://auth.viktor-showcase.dev)  
 _(Admin access is not publicly exposed)_
 
