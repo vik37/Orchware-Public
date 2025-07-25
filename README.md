@@ -251,7 +251,8 @@ This system allows fruit wholesalers to efficiently manage ordering, storage, an
 ✔ **Seq** (structured log ingestion & visualization)
 ✔ **Grafana** (dashboarding and alerting)
 ✔ **Tempo** (distributed trace backend)
-✔ **Prometheus** (metrics scraping & backend)
+✔ **Prometheus** (metrics scraping & backend)                   
+✔ **Keycloak** (Authentication/Authorization, Single Sign On, OAuht, OIDC)           
 
 
 ---
