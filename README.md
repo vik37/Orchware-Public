@@ -35,7 +35,8 @@ The app is live, and updates are delivered in real time via a CI/CD pipeline.
 ### 🧱 Tech Stack
 
 ![Backend](https://img.shields.io/badge/backend-.NET-512BD4?logo=dotnet) ![Frontend](https://img.shields.io/badge/frontend-Angular-DD0031?logo=angular) ![Containerized](https://img.shields.io/badge/containerized-Docker-2496ED?logo=docker) ![Proxy](https://img.shields.io/badge/reverse%20proxy-NGINX-009639?logo=nginx) ![Serilog](https://img.shields.io/badge/logging-Serilog-4AB197?logo=serilog&logoColor=white)
-![Seq](https://img.shields.io/badge/logging-Seq-12B886?logo=logstash) ![Tempo](https://img.shields.io/badge/tracing-Tempo-FFB300?logo=grafana) ![Prometheus](https://img.shields.io/badge/metrics-Prometheus-E6522C?logo=prometheus) ![OpenTelemetry](https://img.shields.io/badge/telemetry-OpenTelemetry-262261?logo=opentelemetry) ![Serilog](https://img.shields.io/badge/logging-Serilog-4AB197?logo=serilog&logoColor=white)
+![Seq](https://img.shields.io/badge/logging-Seq-12B886?logo=logstash) ![Tempo](https://img.shields.io/badge/tracing-Tempo-FFB300?logo=grafana) ![Prometheus](https://img.shields.io/badge/metrics-Prometheus-E6522C?logo=prometheus) ![OpenTelemetry](https://img.shields.io/badge/telemetry-OpenTelemetry-262261?logo=opentelemetry) ![Serilog](https://img.shields.io/badge/logging-Serilog-4AB197?logo=serilog&logoColor=white) 
+![Redis](https://img.shields.io/badge/cache-Redis-DC382D?logo=redis&logoColor=white)
 ---
 
 ### ⚙️ Deployment & CI/CD
@@ -149,7 +150,9 @@ This is a public reference of the Orchware project, primarily intended for showc
 This public version is configured slightly differently — just enough to run the app locally or explore how it works.
 The source code here is 99% identical to the private repo, with only minor adjustments made for deployment and security reasons. 
 
-![Issues](https://img.shields.io/github/issues/vik37/Orchware-Public) ![Last Commit](https://img.shields.io/github/last-commit/vik37/Orchware-Public)
+![Last Commit](https://img.shields.io/github/last-commit/vik37/Orchware-Public)
+![Open PRs](https://img.shields.io/github/issues-pr/vik37/Orchware-Public)
+![Closed PRs](https://img.shields.io/github/issues-pr-closed/vik37/Orchware-Public)
 
 ----------
 
@@ -173,13 +176,15 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 🔹 [Additional Context](#additional-context)  
 🔹 [Articles & Publications](#articles--publications)  
 🔹 [License](#license)  
-| 🔹 [What's New](#news)                                                               |
-|--------------------------------------------------------------------------------------|
-|   :arrow_right_hook: [Backoffice Updates](#-backoffice-updates)                      |
-|======================================================================================|
-|   :arrow_right_hook: [Completed Feature - 06/30/2026](#completed-feature---06302026) |
-|======================================================================================|
-----------------------------------------------------------------------------------------
+| 🔹 [What's New](#news)                                                                                                     |
+|-----------------------------------------------------------------------------------------------------------------------------|
+|   :arrow_right_hook: [Backoffice Updates](#-backoffice-updates)                                                             |
+|=============================================================================================================================|
+|   :arrow_right_hook: [Observability: Monitoring & Tracing](#completed-feature---06302025)                                   |
+|=============================================================================================================================|
+|   :arrow_right_hook: [Introduce a comprehensive Company Registration and Management Module](#completed-feature---08282025)  |
+|=============================================================================================================================|
+-------------------------------------------------------------------------------------------------------------------------------
 ---
 
 ## 📌 **Business Overview**
@@ -235,6 +240,8 @@ This system allows fruit wholesalers to efficiently manage ordering, storage, an
 ✅ Focused on exposing **product API (GET/Pagination/Filters)**.  
 ✅ Uses **Entity Framework Cor & Dapper** for efficient database access.  
 ✅ Supports **pagination and filtering** out of the box.  
+✅ Redis integration planned for future caching and performance optimization.          
+:curly_loop: $${\color{blue} \Redis - is - currently - used - for - \draft (Company - Feature), with - caching - planned - for - future - performance - tuning.}$$
 
 ---
 
@@ -252,7 +259,10 @@ This system allows fruit wholesalers to efficiently manage ordering, storage, an
 ✔ **Grafana** (dashboarding and alerting)
 ✔ **Tempo** (distributed trace backend)
 ✔ **Prometheus** (metrics scraping & backend)                   
-✔ **Keycloak** (Authentication/Authorization, Single Sign On, OAuht, OIDC)           
+✔ **Keycloak** (Authentication/Authorization, Single Sign On, OAuht, OIDC)                    
+✔ **Redis** (In-memory distributed cache — currently used for draft storage to reduce DB load and improve responsiveness; caching layer planned for broader performance optimization)
+
+ 
 
 
 ---
@@ -491,7 +501,7 @@ The following improvements were added to support more dynamic and safe SQL filte
 - **Supported Exceptions:** Handles **BadRequestException**, **NotFoundException**, and unexpected server errors.
 - **Consistent API Responses:** Ensures all errors return structured responses following **RFC 7807 problem+json format**.
 
-# Completed Feature - 06/30/2026
+# Completed Feature - 06/30/2025
 
 ---
 
@@ -657,4 +667,175 @@ Implemented using the built-in .NET 8 rate limiter middleware:
 app.UseRateLimiter();
 ```
 
+# Completed Feature - 08/28/2025
 
+## Introduce a comprehensive Company Registration and Management Module
+
+This module allows users (_users_) to register in a new company, assign to an existing company, edit company data, and have an automatic draft saved upon registration.
+
+### Key features and endpoints
+
+This project is used by the following companies:
+
+#### Company Registration
+
+```http
+  POST api/company-registration
+
+  Example body:
+    {
+        "companyName": "Company-Name",
+        "jobTitle": "Admin",
+        "companyEmail": "example@company.com",
+        "companyAddress": "Main Street 12",
+        "phoneNumber": "723333333",
+        "companyCity": "Skopje",
+        "companyLocation": "Center"
+    }
+```
+|Description                |
+|:------------------------- |
+| Register a new company for the currently logged in user. |
+| **201 Created** → returns Location header with link to resource|
+| **409 Conflict** → if company with same name/city/locatio already exists. |
+
+#### Assign User to existing Company
+
+```http
+  POST api/assign-user-to-company
+
+  Example body:
+    {
+        "companyId": 1,
+        "jobTitle": "Admin"
+    }
+```
+|Description                |
+|:------------------------- |
+| Assigns the user to the existing company. |
+| **200 Ok**  |
+
+#### Company Registration Draft
+
+```http
+  POST api/company-registration-draft
+```
+|Description                |
+|:------------------------- |
+|Saving the temporary state (draft) of the company registration form. |   
+|Redis cache with expiration (7 days) is used.     |   
+| **204 No Content**  |
+
+#### Update Company
+
+```http
+  PUT api/update-company
+```
+|Description                |
+|:------------------------- |
+| Edit company, allowed only for **JobTitle** Owner and Admin. |   
+|SQL Trigger ensures that if a company name is changed, it is applied globally to all records with the same name.     |   
+| **204 No Content**  |
+
+#### Get Current User Company Details
+
+```http
+  GET api/get-company/{companyId}/user-details
+```
+|Description                |
+|:------------------------- |
+| Edit company, allowed only for **JobTitle** Owner and Admin. | 
+| **200 OK**  |
+
+#### Get Company by Id
+
+```http
+  GET api/get-company-by-id/{id}
+```
+|Description                |
+|:------------------------- |
+| Returns data for a company with a specified ID. | 
+| **200 OK**  |
+
+#### Edit User Job Title in Company
+
+```http
+  PATCH api/edit-user-company-job-title
+```
+|Description                |
+|:------------------------- |
+| Returns data for a company with a specified ID. | 
+| **204 NoContent**  |
+
+#### Company Main Roles
+
+```http
+  GET api/company-main-roles
+```
+|Description                |
+|:------------------------- |
+| List of main roles that exist in a company: 'Admin', 'Owner', 'Manager' | 
+| **200 OK**  |
+
+#### User Has Registered Company
+
+```http
+  	GET: api/has-registered-company
+```
+|Description                |
+|:------------------------- |
+| Returns `boolean` | 
+| **200 OK**  |     
+
+-----------------------------------
+
+* **We must note that although it is part of the frontend** - For the registration form, autosave with debounce logic has been implemented:
+
+````
+registerForm() {
+  this.registrationForm.valueChanges
+    .pipe(
+      debounceTime(5000), // чека 5 секунди по последна промена
+      takeUntil(this.destroy$),
+      filter(formValue => {
+        // спречува празни форми да се праќаат како draft
+        const allValuesEmpty = Object.values(formValue).every(value => 
+          !value || (typeof value === 'string' && value.trim() === '')
+        );
+        return !allValuesEmpty;
+      })
+    )
+    .subscribe(formValue => {
+      this.userCompanyService.registerNewCompanyDraft(formValue as UserCompanyProfileFormCommand);
+    });
+
+  this.validationErrors.setActiveForm(this.formType, this.registrationForm);
+}
+
+````
+
+**Advantages**
+
+1. [x] *debounceTime(5000) ensures that the draft is not sent on every keypress, but only 5 seconds after the last change.*
+
+2. [x] *filter checks if at least one field has a value, to avoid sending an empty draft.*
+
+3. [x] *The draft is stored in Redis and automatically expires after 7 days.*
+
+### Security & Auth
+
+* All sensitive endpoints are protected with ``[Authorize(Policy = "Non Employee User")]``. 
+* Rate limiting is used to prevent abuse.        
+
+### Video Documentation 
+
+As a final verification before further development, a video was produced to document the full testing, with major changes only in the Frontoffice Service.
+
+![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)
+
+**Youtube Link: [https://youtu.be/j_CQmQH8VZA](https://youtu.be/j_CQmQH8VZA)**
+
+**UI - Video Example: [https://youtu.be/wxsN9_a05bE](https://youtu.be/wxsN9_a05bE)**
+
+
+_________________________
