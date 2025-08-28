@@ -11,7 +11,7 @@ Orchware is a warehouse management system built using Angular (frontend) and ASP
 🌐 **Live app:** [https://viktor-showcase.dev/orchware](https://viktor-showcase.dev/orchware)
 
 :book: **PDF Documentation**
-[Orchware_Description.pdf](https://eu2.contabostorage.com/2efd0461225649f1ab046e9a2f8101ca:vikstr/documents/Orchware_Description.pdf)            
+[Orchware_Description.pdf](https://eu2.contabostorage.com/2efd0461225649f1ab046e9a2f8101ca:vikstr/documents/Orchware_Description.pdf)       
 A detailed description of the system's business logic, design, and development process.
 
 ----
