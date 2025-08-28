@@ -1,5 +1,4 @@
-﻿
-namespace Orchware.Frontoffice.API.Features.Products.FilteredProducts;
+﻿namespace Orchware.Frontoffice.API.Features.Products.FilteredProducts;
 
 public class FilteredProductsDto
 {

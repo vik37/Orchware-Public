@@ -12,7 +12,7 @@ public class UserContextService : IUserContextService
 		_contextAccessor = contextAccessor;
 	}
 
-	public string? Id => _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+	public Guid? Id => SetId();
 
 	public string? UserName => _contextAccessor.HttpContext?.User?.Identity?.Name;
 
@@ -21,4 +21,14 @@ public class UserContextService : IUserContextService
 	public string? Firstname => _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.GivenName)?.Value;
 
 	public string? Lastname => _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Surname)?.Value;
+
+	private Guid? SetId()
+	{
+		var idString = _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+		if (Guid.TryParse(idString, out var id)) // Овде се прави безбедно парсирање
+		{
+			return id;
+		}
+		return null;
+	}
 }

@@ -2,7 +2,7 @@
 
 public interface IUserContextService
 {
-	public string? Id { get; }
+	public Guid? Id { get; }
 	public string? UserName { get; }
 	public string? Email { get; }
 	public string? Firstname { get; }

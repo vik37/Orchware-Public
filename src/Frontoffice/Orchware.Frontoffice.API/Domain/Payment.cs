@@ -1,6 +1,6 @@
 ﻿namespace Orchware.Frontoffice.API.Domain;
 
-public class Payment : Base
+public class Payment : BaseInt
 {
 	public string CustomerId { get; set; } = string.Empty;
 	public Guid OrderId { get; set; }

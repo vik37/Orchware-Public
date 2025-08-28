@@ -2,7 +2,7 @@
 
 namespace Orchware.Frontoffice.API.Domain;
 
-public class Product : BaseNamed
+public class Product : BaseNamedInt
 {
 	public SeasonalFruits SeasonalFruits { get; set; }
 	public float AvailableQuantity { get; set; }

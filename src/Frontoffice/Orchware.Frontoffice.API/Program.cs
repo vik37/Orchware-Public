@@ -2,10 +2,12 @@ using DbQueryBuilder;
 using FileStorage;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.HttpOverrides;
 using Orchware.Frontoffice.API.Common.Configurations;
 using Orchware.Frontoffice.API.Common.Contracts;
 using Orchware.Frontoffice.API.Common.Middleware;
 using Orchware.Frontoffice.API.Common.Pipeline;
+using Orchware.Frontoffice.API.Infrastructure.Cache;
 using Orchware.Frontoffice.API.Infrastructure.Identity;
 using Orchware.Frontoffice.API.Infrastructure.Persistence;
 using Orchware.Frontoffice.API.Infrastructure.Persistence.Dapper;
@@ -25,6 +27,12 @@ var env = Environment.CurrentDirectory;
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddStackExchangeRedisCache(opt =>
+{
+	opt.Configuration = builder.Configuration["RedisConnection:RedisPort"];
+	opt.InstanceName = builder.Configuration["RedisConnection:RedisInstance"];
+});
 
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddMediatR(conf => conf.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
@@ -46,6 +54,7 @@ builder.Services.AddDbQueryBuilder<OrchwareFrontofficeFieldPremmisionProvider>()
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.AddScoped<IRedisDistributedCacheService,RedisDistributedCacheService>();
 
 builder.Services.AddScoped<OrchwareFrontInitializer>();
 
@@ -55,9 +64,16 @@ var app = builder.Build();
 
 try
 {
+	var forwardedHeadersOptions = new ForwardedHeadersOptions
+	{
+		ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
+	};
+
+	app.UseForwardedHeaders(forwardedHeadersOptions);
+
 	app.UseMiddleware<ExceptionMiddleware>();
 
-	app.UseHttpsRedirection();
+	//app.UseHttpsRedirection();
 
 	// Configure the HTTP request pipeline.
 	if (app.Environment.IsDevelopment())
@@ -69,6 +85,10 @@ try
 			opt.OAuthUsePkce();
 		});
 		app.UseCors("OrchwareFOPoliciesDev");
+	}
+	else
+	{
+		app.UseCors("OrchwareFOPoliciesProd");
 	}
 
 	app.UseSerilogRequestLogging();
