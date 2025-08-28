@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Orchware.Frontoffice.API.Features.Products.GetProductUnitOfMeasures;
 
-[Route("api/products")]
+[Route("api/get-product-unit-of-measures")]
 [ApiController]
 public class GetProductUnitOfMeasuresController : ControllerBase
 {
@@ -18,7 +18,7 @@ public class GetProductUnitOfMeasuresController : ControllerBase
 	/// Retrieves all unit of measures as an enumerable list.
 	/// </summary>
 	/// <example>
-	///   GET api/products/units-of-measure
+	///   GET aapi/get-product-unit-of-measures
 	///   Response:
 	///   [
 	///      { "Index": 1, "Name": "g", "Fullname": "Grams" },
@@ -28,7 +28,7 @@ public class GetProductUnitOfMeasuresController : ControllerBase
 	/// </example>
 	/// <param name="cancellationToken">Cancellation token</param>
 	/// <returns>List of unit of measures with display names and fullnames</returns>
-	[HttpGet("units-of-measure")]
+	[HttpGet]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<IActionResult> Get(CancellationToken cancellationToken)
 	{

@@ -1,11 +1,12 @@
 ﻿namespace Orchware.Frontoffice.API.Domain;
 
-public class Order : BaseAuditableEntity
+public class Order : BaseAuditableEntityGuid
 {
-	public Guid Id { get; set; }
 	public OrderStatus Status { get; set; } = OrderStatus.Pending;
 	public int CompanyId { get; set; }
 	public Company Company { get; set; }
+	public Guid UserId { get; set; }
+	public User User { get; set; }
 	public DateTime? OrderDate { get; set; }
 	public decimal Amount { get; set; }
 	public decimal TotalAmount { get; set; }
@@ -18,7 +19,9 @@ public class Order : BaseAuditableEntity
 	public Order()
 	{
 		OrderNumber = $"#ON{DateTime.UtcNow:yyyyMMddHHmmss}{Guid.NewGuid().ToString().Substring(0, 8)}";
-		OrderDetails = new List<OrderDetails>() ;
+		OrderDetails = new List<OrderDetails>();
+		User = new();
+		Company = new();
 	}
 }
 

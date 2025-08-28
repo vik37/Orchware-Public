@@ -14,6 +14,7 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence
 		public DbSet<Product> Product { get; set; }
 		public DbSet<Payment> Payment { get; set; }
 		public DbSet<Order> Order { get; set; }
+		public DbSet<User> User { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -22,6 +23,23 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence
 			modelBuilder.ApplyConfiguration(new OrderDetailsEntityTypeConfigurations());
 			modelBuilder.ApplyConfiguration(new PaymentEntityTypeConfiguration());
 			modelBuilder.ApplyConfiguration(new ProductEntityTypeConfiguration());
+			modelBuilder.ApplyConfiguration(new  UserEntityTypeConfiguration());
+		}
+
+		public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+		{
+			foreach (var entry in ChangeTracker.Entries<IAuditable>()
+			.Where(e => e.State == EntityState.Added || e.State == EntityState.Modified))
+				{
+					entry.Entity.ModifiedDate = DateTime.UtcNow;
+
+					if (entry.State == EntityState.Added)
+					{
+						entry.Entity.CreatedDate = DateTime.UtcNow;
+					}
+				}
+
+				return base.SaveChangesAsync(cancellationToken);
 		}
 	}
 }

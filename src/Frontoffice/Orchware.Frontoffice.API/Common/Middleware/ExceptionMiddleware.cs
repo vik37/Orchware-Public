@@ -58,6 +58,30 @@ public class ExceptionMiddleware
 				};
 				_logger.LogWarning("HTTP Status: {HTTP_STATUS}, Message: {MESSAGE}", httpStatusCode, notFoundException.Message);
 				break;
+			case ForbiddenException forbiddenException:
+				httpStatusCode = HttpStatusCode.Forbidden;
+				problem = new CustomProblemDetails
+				{
+					Title = forbiddenException.Message,
+					Status = (int)httpStatusCode,
+					Type = nameof(ForbiddenException),
+				};
+				_logger.LogWarning("HTTP Status: {HTTP_STATUS}, Message: {MESSAGE}", httpStatusCode, forbiddenException.Message);
+				break;
+			case EntityAlreadyExistsException entityAlreadyExistsException:
+				httpStatusCode = HttpStatusCode.Conflict;
+				problem = new CustomProblemDetails
+				{
+					Title = entityAlreadyExistsException.Message,
+					Status = (int)httpStatusCode,
+					Detail = entityAlreadyExistsException.Detail,
+					EntityName = entityAlreadyExistsException.EntityName,
+					Identifier = entityAlreadyExistsException.Identifier,
+					ExistingEntityId = entityAlreadyExistsException.ExistingEntityId,
+					Type = nameof(EntityAlreadyExistsException),
+				};
+				_logger.LogWarning("HTTP Status: {HTTP_STATUS}, Message: {MESSAGE}", httpStatusCode, entityAlreadyExistsException.Message);
+				break;
 			default:
 				problem = new CustomProblemDetails
 				{

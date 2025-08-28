@@ -1,9 +1,9 @@
 ﻿namespace Orchware.Frontoffice.API.Domain;
 
-public class OrderDetails : Base
+public class OrderDetails : BaseInt
 {
 	public Guid OrderId { get; set; }
-	public Order Order { get; set; } = new Order();
+	public Order Order { get; set; } = new();
 	public int ProductId { get; set; }
 	public Product Product { get; set; } = new();
 	public float Quantity { get; set; }

@@ -47,15 +47,24 @@ public class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
 			.HasColumnOrder(8)
 			.IsRequired();
 
-		builder.Property(x => x.CreatedDate)
+		builder.Property(x => x.UserId)
+			.HasColumnType("uniqueidentifier")
 			.HasColumnOrder(9);
 
-		builder.Property(x => x.ModifiedDate)
+		builder.Property(x => x.CreatedDate)
 			.HasColumnOrder(10);
+
+		builder.Property(x => x.ModifiedDate)
+			.HasColumnOrder(11);
 
 		builder.HasMany(x => x.OrderDetails)
 			.WithOne(x => x.Order)
 			.HasForeignKey(x => x.OrderId)
 			.OnDelete(DeleteBehavior.Cascade);
+
+		builder.HasOne(x => x.User)
+			.WithMany(x => x.Orders)
+			.HasForeignKey(x => x.UserId)
+			.OnDelete(DeleteBehavior.NoAction);
 	}
 }

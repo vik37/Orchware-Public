@@ -4,20 +4,19 @@ using System.Data;
 
 namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Dapper;
 
-public class DapperContext : IDisposable
+public class DapperContext
 {
-	private readonly IDbConnection _connection;
+	private readonly string _connectionString;
 
 	public DapperContext(IConfiguration configuration)
 	{
-		_connection = new SqlConnection(configuration.GetConnectionString("MSSQLDbConnection"));
+		_connectionString = configuration.GetConnectionString("MSSQLDbConnection")??throw new ArgumentNullException();
 	}
 
-	public IDbConnection CreateConnection() => _connection;
-
-	public void Dispose()
+	public IDbConnection CreateConnection()
 	{
-		_connection.Dispose();
+		var connection = new SqlConnection(_connectionString);
+		return connection;
 	}
 
 	public async Task<IEnumerable<T>> ExecuteStoredProcedureAsync<T>(

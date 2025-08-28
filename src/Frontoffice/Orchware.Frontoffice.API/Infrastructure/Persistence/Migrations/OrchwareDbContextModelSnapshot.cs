@@ -31,28 +31,33 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnOrder(6);
+
                     b.Property<decimal>("Budget")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnOrder(8);
 
-                    b.Property<string>("Buyer")
+                    b.Property<string>("City")
                         .IsRequired()
-                        .HasColumnType("nvarchar(550)")
-                        .HasColumnOrder(4);
-
-                    b.Property<string>("CompanyEmail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnOrder(7);
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(3);
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(9);
 
-                    b.Property<string>("JobTitle")
+                    b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(850)")
+                        .HasColumnType("nvarchar(400)")
                         .HasColumnOrder(5);
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(250)")
+                        .HasColumnOrder(4);
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2")
@@ -61,22 +66,14 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(550)")
-                        .HasColumnOrder(3);
-
-                    b.Property<string>("PersonalEmail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnOrder(6);
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(550)")
                         .HasColumnOrder(2);
 
-                    b.HasKey("Id");
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnOrder(7);
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasKey("Id");
 
                     b.ToTable("Company");
                 });
@@ -99,7 +96,7 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
-                        .HasColumnOrder(9);
+                        .HasColumnOrder(10);
 
                     b.Property<int?>("Discount")
                         .HasColumnType("int")
@@ -107,7 +104,7 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2")
-                        .HasColumnOrder(10);
+                        .HasColumnOrder(11);
 
                     b.Property<DateTime?>("OrderDate")
                         .HasColumnType("datetime2")
@@ -127,9 +124,15 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnOrder(6);
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(9);
+
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Order");
                 });
@@ -266,6 +269,37 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
                     b.ToTable("Product");
                 });
 
+            modelBuilder.Entity("Orchware.Frontoffice.API.Domain.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(1);
+
+                    b.Property<int?>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("JobTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(850)")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(550)")
+                        .HasColumnOrder(2);
+
+                    b.Property<string>("PersonalEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnOrder(4);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("User");
+                });
+
             modelBuilder.Entity("Orchware.Frontoffice.API.Domain.Order", b =>
                 {
                     b.HasOne("Orchware.Frontoffice.API.Domain.Company", "Company")
@@ -274,7 +308,15 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Orchware.Frontoffice.API.Domain.User", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.Navigation("Company");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Orchware.Frontoffice.API.Domain.OrderDetails", b =>
@@ -296,14 +338,31 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Orchware.Frontoffice.API.Domain.User", b =>
+                {
+                    b.HasOne("Orchware.Frontoffice.API.Domain.Company", "Company")
+                        .WithMany("Users")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("Orchware.Frontoffice.API.Domain.Company", b =>
                 {
                     b.Navigation("Orders");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Orchware.Frontoffice.API.Domain.Order", b =>
                 {
                     b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("Orchware.Frontoffice.API.Domain.User", b =>
+                {
+                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

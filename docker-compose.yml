@@ -98,6 +98,14 @@ services:
       - prometheus
     restart: unless-stopped
 
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
   orchware.frontoffice.api:
     image: ${DOCKER_REGISTRY-}orchwarefrontofficeapi:latest
     container_name: orchware.frontoffice.api
@@ -110,6 +118,7 @@ services:
       - prometheus
       - tempo
       - keycloak
+      - redis
     restart: always
     ports:
       - "5050:5050"
@@ -118,6 +127,7 @@ services:
       - ASPNETCORE_HTTP_PORTS=5050
       - ConnectionStrings__MSSQLDbConnection=Server=mssql;Database=FrontOfficeDb;User Id=sa;Password=Test123#;TrustServerCertificate=True;MultipleActiveResultSets=True
       - Authentication__MetadataAudience=http://keycloak:8080/realms/orchware-dev/.well-known/openid-configuration
+      - RedisConnection__RedisPort=redis:6379
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -143,7 +153,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=4040
       - ConnectionStrings__MSSQLDbConnection=Server=mssql;Database=BackOfficeDb;User Id=sa;Password=Test123#;TrustServerCertificate=True;MultipleActiveResultSets=True
-      - Authentication__ClientSecrets=jU3DxNY54vjzr7DZjPTUnDQicoYU4pVx
+      - Authentication__ClientSecrets=qPVmMbZAweudUsbfBxWNUJ2TvPdBDJ47
       - Authentication__MetadataAudience=http://keycloak:8080/realms/orchware-dev/.well-known/openid-configuration
     volumes:
       - ./src/Backoffice/Orchware.Backoffice.Infrastructure/Persistence/SeedFiles/Shelf.csv:/app/Persistence/SeedFiles/Shelf.csv

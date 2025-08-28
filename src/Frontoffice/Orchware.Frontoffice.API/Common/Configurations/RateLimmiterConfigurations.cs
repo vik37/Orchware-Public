@@ -20,6 +20,18 @@ public static class RateLimmiterConfigurations
 						QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
 						QueueLimit = 1
 					}));
+
+			options.AddPolicy("fixed-by-ip", httpContext =>
+				RateLimitPartition.GetFixedWindowLimiter(
+					partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+					factory: _ => new FixedWindowRateLimiterOptions
+					{
+						PermitLimit = 5,
+						Window = TimeSpan.FromSeconds(10),
+						QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+						QueueLimit = 1
+					}));
+
 			options.OnRejected = (ctx, token) =>
 			{
 				var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();

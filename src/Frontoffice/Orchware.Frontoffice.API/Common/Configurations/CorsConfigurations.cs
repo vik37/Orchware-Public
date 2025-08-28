@@ -11,7 +11,20 @@ public static class CorsConfigurations
 				policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
 					 .AllowAnyHeader()
 					 .AllowAnyMethod()
-					 .AllowCredentials();
+					 .AllowCredentials()
+					 .WithExposedHeaders("Location");
+			});
+		});
+
+		services.AddCors(option =>
+		{
+			option.AddPolicy("OrchwareFOPoliciesProd", policy =>
+			{
+				policy.WithOrigins("http://orchwarefrontend", "https://viktor-showcase.dev", "https://www.viktor-showcase.dev")
+					 .AllowAnyHeader()
+					 .WithMethods("GET", "POST", "PUT")
+					 .AllowCredentials()
+					 .WithExposedHeaders("Location");
 			});
 		});
 

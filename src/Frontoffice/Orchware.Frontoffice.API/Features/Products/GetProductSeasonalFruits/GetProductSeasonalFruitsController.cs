@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Orchware.Frontoffice.API.Features.Products.GetProductSeasonalFruits;
 
-[Route("api/products")]
+[Route("api/get-product-seasonal-fruits")]
 [ApiController]
 public class GetProductSeasonalFruitsController : ControllerBase
 {
@@ -18,7 +18,7 @@ public class GetProductSeasonalFruitsController : ControllerBase
 	/// Retrieves all seasonal fruits as an enumerable list.
 	/// </summary>
 	/// <example>
-	///   GET api/products/seasonal-fruits
+	///   GET api/get-product-seasonal-fruits
 	///   Response:
 	///   [
 	///      { "Index": 1, "Name": "Winter" },
@@ -28,7 +28,7 @@ public class GetProductSeasonalFruitsController : ControllerBase
 	/// </example>
 	/// <param name="cancellationToken">Cancellation token</param>
 	/// <returns>List of seasonal fruits with display names</returns>
-	[HttpGet("seasonal-fruits")]
+	[HttpGet]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	public async Task<IActionResult> Get(CancellationToken cancellationToken)
 	{
