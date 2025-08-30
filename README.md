@@ -837,9 +837,9 @@ As a final verification before further development, a video was produced to docu
 
 ![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)
 
-**Youtube Link: [https://youtu.be/j_CQmQH8VZA](https://youtu.be/j_CQmQH8VZA)**
+**Youtube Link: [Behind the Scenes Company Management Module Live Demo](https://www.youtube.com/watch?v=X_lMZrjcQQs)**
 
-**UI - Video Example: [https://youtu.be/wxsN9_a05bE](https://youtu.be/wxsN9_a05bE)**
+**UI - Video Example: [Complexity or "Feature"? "Register Company" in Orchware Project](https://youtu.be/wxsN9_a05bE)**
 
 
 _________________________
