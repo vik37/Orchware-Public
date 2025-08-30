@@ -440,6 +440,10 @@ This system does **not** follow a strict microservices architecture to keep depl
 - **Real-world tech stack** combining Angular, .NET, Dapper, EF Core, and OpenTelemetry
 
 The goal is to present a **production-like, modular system** suitable for real-world scenarios and job demonstration.
+
+### Final look _'diagram'_ when finished
+
+![Final Diagram](git_docs/images/diagram.png)
   
 ## Articles & Publications
 
