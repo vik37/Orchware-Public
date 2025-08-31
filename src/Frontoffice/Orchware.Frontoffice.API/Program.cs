@@ -64,13 +64,6 @@ var app = builder.Build();
 
 try
 {
-	var forwardedHeadersOptions = new ForwardedHeadersOptions
-	{
-		ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
-	};
-
-	app.UseForwardedHeaders(forwardedHeadersOptions);
-
 	app.UseMiddleware<ExceptionMiddleware>();
 
 	//app.UseHttpsRedirection();
