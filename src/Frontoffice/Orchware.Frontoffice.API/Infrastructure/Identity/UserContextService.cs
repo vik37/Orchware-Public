@@ -25,7 +25,7 @@ public class UserContextService : IUserContextService
 	private Guid? SetId()
 	{
 		var idString = _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-		if (Guid.TryParse(idString, out var id)) // Овде се прави безбедно парсирање
+		if (Guid.TryParse(idString, out var id))
 		{
 			return id;
 		}
