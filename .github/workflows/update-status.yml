@@ -23,12 +23,12 @@ jobs:
 
       - name: Run script
         env:
-          GH_TOKEN: ${{ secrets.GH_ISS }}
+          GH_ISS: ${{ secrets.GH_ISS }}
         run: python .github/scripts/update_status.py
 
       - name: Commit and push changes
         env:
-          GH_PAT: ${{ secrets.GH_ISS }}
+          GH_ISS: ${{ secrets.GH_ISS }}
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
