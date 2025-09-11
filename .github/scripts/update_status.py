@@ -12,7 +12,7 @@ LABELS = {
 
 def count_issues(label):
     url = f"https://api.github.com/search/issues?q=repo:{REPO}+label:status:{label}+state:open"
-    headers = {"Authorization": f"Bearer {os.getenv('GH_TOKEN')}"}
+    headers = {"Authorization": f"Bearer {os.getenv('GH_ISS')}"}
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         print(f"Error fetching {label}: {response.status_code}")
