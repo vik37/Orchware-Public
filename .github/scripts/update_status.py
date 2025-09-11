@@ -1,7 +1,7 @@
 ﻿import requests
 import os
 
-REPO = "vik37/Orchware"
+REPO = "vik37/Orchware-Public"
 LABELS = {
     "todo": "blue",
     "in-progress": "yellow",
