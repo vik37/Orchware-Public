@@ -2,7 +2,7 @@ name: Update Issue Status Badges
 
 on:
   schedule:
-    - cron: '0 8 * * 1'  # Секој понеделник во 08:00 UTC
+    - cron: '0 8 * * 1'
   workflow_dispatch:
 
 jobs:
@@ -23,16 +23,16 @@ jobs:
 
       - name: Run script
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Користи PAT наместо default bot
+          GH_TOKEN: ${{ secrets.GH_ISS }}
         run: python .github/scripts/update_status.py
 
       - name: Commit and push changes
         env:
-          GH_PAT: ${{ secrets.GH_TOKEN }}
+          GH_PAT: ${{ secrets.GH_ISS }}
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/vik37/Orchware-Public.git
+          git remote set-url origin https://x-access-token:${GH_ISS}@github.com/vik37/Orchware-Public.git
           git add README.md
           git commit -m "Update issue status badges" || echo "No changes to commit"
           git push
