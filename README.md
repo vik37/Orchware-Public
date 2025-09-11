@@ -31,13 +31,13 @@ The app is live, and updates are delivered in real time via a CI/CD pipeline.
 ![Status](https://img.shields.io/badge/status-in%20progress-yellow) ![Maintained](https://img.shields.io/badge/maintained-yes-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 # Agile Methodology - Kanban
-## 📊 Issue Count by Status <!-- STATUS START -->
+## 📊 Issue Count by Status ## 📊 Issue Count by Status <!-- STATUS START -->
 
-![Todo](https://img.shields.io/badge/Todo-42-blue?style=flat-square)
-![In Progress](https://img.shields.io/badge/In--Progress-17-yellow?style=flat-square)
-![Done](https://img.shields.io/badge/Done-28-lightgrey?style=flat-square)
-![QA Test](https://img.shields.io/badge/QA--Test-5-pink?style=flat-square)
-![Completed](https://img.shields.io/badge/Completed-9-purple?style=flat-square)
+![Todo](https://img.shields.io/badge/todo-0-blue?style=flat-square)
+![In-progress](https://img.shields.io/badge/in--progress-0-yellow?style=flat-square)
+![Qa-test](https://img.shields.io/badge/qa--test-0-pink?style=flat-square)
+![Done](https://img.shields.io/badge/done-0-lightgrey?style=flat-square)
+![Completed](https://img.shields.io/badge/completed-0-purple?style=flat-square)
 
 <!-- STATUS END -->
 ---
