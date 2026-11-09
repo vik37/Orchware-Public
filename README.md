@@ -189,7 +189,9 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 ## 📑 **Table of Contents**  
 🔹 [Business Overview](#-business-overview)    
 🔹 [Business Logic & Order Flow](#-business-logic--order-flow)   
-🔹 [Cancellation & Payment Rules](#-cancellation--payment-rules)  
+🔹 [Cancellation Flow](#-cancellation-flow)  
+🔹 [Payment Rules & Dynmaic (Rules) Configurations](#-payment-rules--dynamic-configuration)  
+🔹 [Payment Simmulations](#-bank-payment-simulation--azure-invoice-service)  
 🔹 [Technical Overview](#-technical-overview)        
 🔹 [Technologies Used](#technologies-used)    
 🔹 [Project Structure](#-project-structure)  
@@ -238,7 +240,7 @@ Together, these components support the complete wholesale workflow, from company
 
 ## 🚀 Business Logic & Order Flow
 
-### 👤 $${\color{green} Roles \space in \space Orchware}$$        
+### $${\color{green} Roles \space in \space Orchware}$$        
 > Manager: Oversees customer orders, inventory shortages, payment tracking, and approvals.  
 > Warehouseman: Packs, loads, and ensures shipments are prepared for transport.      
 > Order Lifecycle & Statuses    
@@ -283,6 +285,27 @@ Together, these components support the complete wholesale workflow, from company
 * **Manager Configuration Panel (Backoffice Settings):**  
   * **Manager Control:** The **Manager** can modify payment rules, maximum installment limits, grace periods, and discount percentages at any time via a dedicated Settings navigation bar in the Backoffice.  
   * **Real-Time Synchronization:** Updates are persisted to the database and automatically synchronized across both **Frontoffice** and **Backoffice** services to ensure consistent checkout and order processing.
+ 
+### 🏦 **Bank Payment Simulation & Azure Invoice Service**
+
+To simulate real-world B2B transactional workflows without external payment gateway dependencies, Orchware features an in-house **Bank Payment Simulator**:
+
+* **Company Account & Budget Initialization:**  
+  * Upon initial registration, every client company is automatically assigned a randomized starting account balance/budget in the system.
+
+* **Admin Payment Simulation (Bank Proxy):**  
+  * An **Admin** user can access the payment administration queue to simulate bank settlement for outstanding orders ("Mark as Paid").  
+  * **Solvency Check:** Before confirming payment, the system performs an automated balance check against the purchasing company's account budget to ensure sufficient funds exist.
+
+* **Installment Billing Cycle & Background Worker Service:**  
+  * **First Installment Settlement:** When an order is split into installments, the customer/admin can initially settle only the first installment.  
+  * **Automated Invoice Generation by Billing Worker:** A dedicated **Background Worker Service (Billing)** periodically runs to generate the invoice for each upcoming installment when due.  
+  * **Progressive Payment Workflow:** The "Mark as Paid" action is progressively enabled for each newly generated installment invoice until all installments are settled.  
+  * **Full Payment Completion (`IsFullPaid`):** Only after the final installment is paid, the system automatically flags the entire order with `IsFullPaid = true` across both Frontoffice and Backoffice domain models.
+
+* **Automated Azure Function Invoice Generation:**  
+  * Upon successful balance validation, the settlement triggers an **Azure Function** microservice that dynamically generates a stamped digital invoice (PDF).  
+  * **Verified Bank Stamp & Details:** The generated invoice automatically includes structured order items, applicable discounts, payment terms, and official bank verification metadata (*Bank Name, Representative Signature, and Verified Bank Stamp*).
 
 ---
 
