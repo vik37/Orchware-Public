@@ -1,31 +1,92 @@
-﻿namespace Orchware.Frontoffice.API.Domain;
+﻿using Utilities.Converters;
+
+namespace Orchware.Frontoffice.API.Domain;
 
 public class Order : BaseAuditableEntityGuid
 {
-	public OrderStatus Status { get; set; } = OrderStatus.Pending;
-	public int CompanyId { get; set; }
-	public Company Company { get; set; }
-	public Guid UserId { get; set; }
-	public User User { get; set; }
-	public DateTime? OrderDate { get; set; }
-	public decimal Amount { get; set; }
-	public decimal TotalAmount { get; set; }
-	public int? Discount { get; set; }
+	private readonly List<OrderDetails> _orderDetails = new();
+	private OrderStatus _status = OrderStatus.Requested;
+
+	public OrderStatus Status => _status;
+	public int CompanyId { get; private set; }
+	public Company Company { get; private set; }
+	public Guid UserId { get; private set; }
+	public User User { get; private set; }
+	public DateTime? OrderDate { get; private set; }
+	public int? Discount { get; private set; }
 	public string OrderNumber { get; private set; }
 
-	public ICollection<OrderDetails> OrderDetails { get; set; }
-		
+	public decimal Amount => _orderDetails.Sum(d => d.PricePerUnit * (decimal)d.Quantity);
+	public decimal TotalAmount => Discount.HasValue
+		? Amount - (Amount * Discount.Value / 100m)
+		: Amount;
 
-	public Order()
+	public IReadOnlyCollection<OrderDetails> OrderDetails => _orderDetails.AsReadOnly();
+
+	#nullable disable
+	public Order(){}
+	#nullable enable
+
+	public Order(User user, int? discount = null)
 	{
-		OrderNumber = $"#ON{DateTime.UtcNow:yyyyMMddHHmmss}{Guid.NewGuid().ToString().Substring(0, 8)}";
-		OrderDetails = new List<OrderDetails>();
-		User = new();
-		Company = new();
+		Company = user.Company ?? throw new ArgumentNullException(nameof(user.Company));
+		User = user ?? throw new ArgumentNullException(nameof(user));
+		CompanyId = user.CompanyId ?? throw new ArgumentNullException(nameof(user.CompanyId));
+		UserId = user.Id;
+		OrderDate = DateTime.UtcNow;
+		Discount = discount;
+
+		OrderNumber = $"#ON-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")}".Substring(0, 17);
+	}
+
+	public void AddOrderDetail(OrderDetails detail)
+	{
+		if (detail == null) throw new ArgumentNullException(nameof(detail));
+
+		_orderDetails.Add(detail);
+	}
+
+	public void AddOrUpdateDetails(IReadOnlyCollection<OrderDetails> newDetails)
+	{
+		foreach (var newItem in newDetails)
+		{
+			var existing = this.OrderDetails.FirstOrDefault(x => x.ProductId == newItem.ProductId);
+			if (existing is not null)
+			{
+				if(newItem.UnitOfMeasure == existing.UnitOfMeasure)
+				{
+					existing.Quantity += newItem.Quantity;
+				}
+				else
+				{
+					var convertedQuantity = UnitConverter.Convert(
+						newItem.Quantity,
+						newItem.UnitOfMeasure,
+						existing.UnitOfMeasure
+					);
+
+					existing.Quantity += convertedQuantity;
+				}
+				
+				existing.CalculateTotalPrice();
+			}
+			else
+			{
+				this.AddOrderDetail(newItem);
+			}
+		}
+	}
+
+	public void SetStatus(OrderStatus newStatus)
+	{
+		if (!OrderStatus.CanTransition(_status,newStatus))
+			throw new InvalidOperationException($"Cannot transition from {_status.Value} to {newStatus.Value}");
+
+		_status = newStatus;
 	}
 }
 
-public class OrderStatus
+public class OrderStatus : IEquatable<OrderStatus>
 {
 	public string Value { get; }
 	public string Color { get; }
@@ -48,4 +109,29 @@ public class OrderStatus
 	{
 		Pending, Requested, Confirmed, InPreparation, AwaitingDispatch, Approved, Cancelled
 	};
+
+	private static readonly Dictionary<OrderStatus, List<OrderStatus>> _transitions = new()
+	{
+		{ OrderStatus.Pending, new() { OrderStatus.Requested, OrderStatus.Cancelled } },
+		{ OrderStatus.Requested, new() { OrderStatus.Confirmed, OrderStatus.Cancelled } },
+		{ OrderStatus.Confirmed, new() { OrderStatus.InPreparation, OrderStatus.Cancelled } },
+		{ OrderStatus.InPreparation, new() { OrderStatus.AwaitingDispatch, OrderStatus.Cancelled } },
+		{ OrderStatus.AwaitingDispatch, new() { OrderStatus.Approved, OrderStatus.Cancelled } },
+		{ OrderStatus.Approved, new() { } }, // Terminal state
+        { OrderStatus.Cancelled, new() { } } // Terminal state
+    };
+
+	public static bool CanTransition(OrderStatus from, OrderStatus to)
+		=> _transitions.TryGetValue(from, out var nextStates) && nextStates.Contains(to);
+
+	public bool Equals(OrderStatus? other)
+		=> other is not null && Value == other.Value;
+
+	public override bool Equals(object? obj)
+		=> Equals(obj as OrderStatus);
+
+	public override int GetHashCode()
+		=> Value.GetHashCode(StringComparison.Ordinal);
+
+	public override string ToString() => Value;
 }

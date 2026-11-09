@@ -24,7 +24,7 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Configurations
 				.IsRequired();
 
 			builder.Property(x => x.Quantity)
-				.HasColumnType("real")
+				.HasColumnType("decimal(18,2)")
 				.HasColumnOrder(4)
 				.IsRequired();
 
@@ -40,12 +40,7 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Configurations
 
 			builder.Property(x => x.TotalPrice)
 				.HasColumnType("decimal(18,2)")
-				.HasColumnOrder(7)
-				.IsRequired();
-
-			builder.HasOne(x => x.Product)
-				.WithMany()
-				.HasForeignKey(x => x.ProductId);
+				.HasColumnOrder(7);
 		}
 	}
 }

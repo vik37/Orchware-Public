@@ -11,7 +11,6 @@ public static class ApplicationServiceRegistration
 	public static IServiceCollection AddApplicationServices(this IServiceCollection services,
 		IConfiguration configuration)
 	{
-		services.AddAutoMapper(Assembly.GetExecutingAssembly());
 		services.AddMediatR(conf => conf.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
 		services.Configure<DatabaseConnectionOption>(opt =>
@@ -21,6 +20,11 @@ public static class ApplicationServiceRegistration
 		});
 
 		services.AddScoped<ISqlQueryBuilder, SqlQueryBuilder>();
+
+		services.AddOptions<ExternalURLS>().Configure<IConfiguration>((options, config) =>
+		{
+			config.GetSection(ExternalURLS.Key).Bind(options);
+		});
 
 		return services;
 	}

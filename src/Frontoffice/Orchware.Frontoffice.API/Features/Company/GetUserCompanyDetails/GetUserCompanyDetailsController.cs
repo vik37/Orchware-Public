@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Orchware.Frontoffice.API.Common.CustomExceptions;
+using Orchware.Frontoffice.API.Common.Filters;
 
 namespace Orchware.Frontoffice.API.Features.Company.GetUserCompanyDetails;
 
 [Route("api/get-company")]
 [ApiController]
+[Authorize(Policy = "NonEmployeeUser")]
 [EnableRateLimiting("slide-by-ip")]
 public class GetUserCompanyDetailsController : ControllerBase
 {
@@ -33,7 +35,7 @@ public class GetUserCompanyDetailsController : ControllerBase
 	/// <exception cref="NotFoundException"></exception>
 	/// <returns>User Profile including his Company Details</returns>
 	[HttpGet("{companyId}/user-details")]
-	[Authorize(Policy = "NonEmployeeUser")]
+	[ServiceFilter(typeof(RequireCompanyFilter))]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status401Unauthorized)]

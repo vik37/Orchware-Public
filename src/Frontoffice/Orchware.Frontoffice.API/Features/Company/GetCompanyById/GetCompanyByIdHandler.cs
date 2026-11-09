@@ -1,11 +1,11 @@
-﻿using AutoMapper;
-using Dapper;
+﻿using Dapper;
 using MediatR;
 using Orchware.Frontoffice.API.Common.Contracts;
 using Orchware.Frontoffice.API.Common.CustomExceptions;
 using Orchware.Frontoffice.API.Common.SQLScriptBuilder;
 using Orchware.Frontoffice.API.Domain;
 using Orchware.Frontoffice.API.Infrastructure.Persistence.Dapper;
+using Utilities.Converters;
 
 namespace Orchware.Frontoffice.API.Features.Company.GetCompanyById;
 
@@ -13,14 +13,12 @@ public class GetCompanyByIdHandler : IRequestHandler<GetCompanyByIdQuery, GetCom
 {
 	private readonly DapperContext _dapperContext;
 	private readonly ISqlQueryBuilder _sqlQueryBuilder;
-	private readonly IMapper _mapper;
 	private readonly IUserContextService _userContextService;
 
-	public GetCompanyByIdHandler(DapperContext dapperContext, ISqlQueryBuilder sqlQueryBuilder, IMapper mapper,
+	public GetCompanyByIdHandler(DapperContext dapperContext, ISqlQueryBuilder sqlQueryBuilder,
 		IUserContextService userContextService)
 	{
 		_dapperContext = dapperContext;
-		_mapper = mapper;
 		_sqlQueryBuilder = sqlQueryBuilder;
 		_userContextService = userContextService;
 	}
@@ -50,8 +48,20 @@ public class GetCompanyByIdHandler : IRequestHandler<GetCompanyByIdQuery, GetCom
 									new { CompanyId = request.Id, UserId =  _userContextService.Id});
 
 		if (company is null)
-			throw new ForbiddenException("You don't have permission to perform this action.");
+			throw new NotFoundException("Company does not exist");
 
-		return _mapper.Map<GetCompanyByIdResponse>(company);
+		return MapCompanyToGetCompanyByIdResponse(company);
 	}
+
+	private GetCompanyByIdResponse MapCompanyToGetCompanyByIdResponse(Domain.Company company)
+		=> new GetCompanyByIdResponse
+		{
+			Id = company.Id,
+			Address = company.Address,
+			City = company.City,
+			Email = company.Email,
+			Location = company.Location,
+			Name = company.Name,
+			Phone = company.Phone.PhoneConverter()
+		};
 }

@@ -7,7 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.5.2" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.56.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.28.0-beta.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.15" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.15">
       <PrivateAssets>all</PrivateAssets>
@@ -21,8 +25,10 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Polly.Core" Version="8.5.2" />
     <PackageReference Include="Polly.Extensions" Version="8.5.2" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.19" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,8 +39,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Common\FileStorage\FileStorage.csproj" />
+    <ProjectReference Include="..\..\Common\IntegrationEvents\IntegrationEvents.csproj" />
     <ProjectReference Include="..\Orchware.Backoffice.Application\Orchware.Backoffice.Application.csproj" />
-   
+    <ProjectReference Include="..\Orchware.Backoffice.Domain\Orchware.Backoffice.Domain.csproj" />
   </ItemGroup>
 
 </Project>

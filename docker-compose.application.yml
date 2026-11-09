@@ -1,0 +1,137 @@
+
+services:
+
+  orchware.frontoffice.api:
+    image: ${DOCKER_REGISTRY-}orchwarefrontofficeapi:latest
+    container_name: orchware.frontoffice.api
+    build:
+      context: .
+      dockerfile: src/Frontoffice/Orchware.Frontoffice.API/Dockerfile
+    depends_on:
+      - mssql
+      - otel-collector
+      - prometheus
+      - tempo
+      - keycloak
+      - redis
+      - rabbit
+      - seq
+    restart: always
+    ports:
+      - "5050:5050"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5050
+      - ConnectionStrings__MSSQLDbConnection=Server=mssql;Database=Frontoffice_DemoDb;User Id=sa;Password=Test123#;TrustServerCertificate=True;MultipleActiveResultSets=True
+      - Authentication__MetadataAudience=http://keycloak:8080/realms/orchware-dev/.well-known/openid-configuration
+      - RedisConnection__RedisPort=redis:6379
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
+      - RabbitMQSettings__Host=rabbit
+      - OpenTelemetry__OtlpExporter__Endpoint=http://otel-collector:4317
+      - OpenTelemetry__OtlpExporter__Protocol=grpc
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5050/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - orchware-network
+
+  orchware.backoffice.api:
+    image: ${DOCKER_REGISTRY-}orchwarebackofficeapi:latest
+    container_name: orchware.backoffice.api
+    build:
+      context: .
+      dockerfile: src/Backoffice/Orchware.Backoffice.API/Dockerfile
+    depends_on:
+      - mssql
+      - otel-collector
+      - prometheus
+      - tempo
+      - keycloak
+      - seq
+      - redis
+      - rabbit
+    restart: always
+    ports:
+      - "4050:4050"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=4050
+      - ConnectionStrings__MSSQLDbConnection=Server=mssql;Database=BackOffice_DemoDb;User Id=sa;Password=Test123#;TrustServerCertificate=True;MultipleActiveResultSets=True
+      - Authentication__ClientSecrets=[AUTH_CLIENT_SECRET]
+      - Authentication__MetadataAudience=http://keycloak:8080/realms/orchware-dev/.well-known/openid-configuration
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
+      - RedisConnection__RedisPort=redis:6379
+      - RabbitMQSettings__Host=rabbit
+      - OpenTelemetry__OtlpExporter__Endpoint=http://otel-collector:4317
+      - OpenTelemetry__OtlpExporter__Protocol=grpc
+    volumes:
+      - ./src/Backoffice/Orchware.Backoffice.Infrastructure/Persistence/SeedFiles/Shelf.csv:/app/Persistence/SeedFiles/Shelf.csv
+      - ./src/Backoffice/Orchware.Backoffice.Infrastructure/Persistence/SeedFiles/Product.csv:/app/Persistence/SeedFiles/Product.csv
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4050/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - orchware-network
+
+  backoffice-worker:
+    container_name: backoffice-worker
+    build:
+      context: .
+      dockerfile: src/Backoffice/backoffice-worker/Dockerfile
+    environment:
+      - OpenTelemetry__OtlpExporter__Endpoint=http://otel-collector:4317
+      - OpenTelemetry__OtlpExporter__Protocol=grpc
+      - ASPNETCORE_ENVIRONMENT=Development
+      - CosmosDBSettings__Secret=[COSMOS_SECRET]
+      - CosmosDBSettings__Endpoint=[COSMOS_ENDPOINT]
+      - CosmosDBSettings__Database=orchwaredb
+      - ConnectionStrings__MSSQLDbConnection=Server=mssql;Database=BackOffice_DemoDb;User Id=sa;Password=Test123#;TrustServerCertificate=True;MultipleActiveResultSets=True
+      - SEQ_URL=http://seq:5341
+    depends_on:
+      - mssql
+      - otel-collector
+      - prometheus
+      - tempo
+      - seq
+    networks:
+      - orchware-network
+
+  orchware.notification.api:
+    image: ${DOCKER_REGISTRY-}orchwarenotificationapi
+    container_name: orchware-notification
+    build:
+      context: .
+      dockerfile: src/Notification/Orchware.Notification.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=6050
+      - RabbitMQSettings__Host=rabbit
+      - ConnectionStrings__MSSQLDbConnection=Server=mssql;Database=Orchware_NotificationDb;User Id=sa;Password=Test123#;TrustServerCertificate=True;MultipleActiveResultSets=True
+      - Serilog__WriteTo__1__Args__serverUrl=http://seq:5341
+      - Authentication__MetadataAudience=http://keycloak:8080/realms/orchware-dev/.well-known/openid-configuration
+      - OpenTelemetry__OtlpExporter__Endpoint=http://otel-collector:4317
+      - OpenTelemetry__OtlpExporter__Protocol=grpc
+    ports:
+      - "6050:6050"
+    depends_on:
+      mssql:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+      prometheus:
+        condition: service_started
+      tempo:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      rabbit:
+        condition: service_healthy
+      seq:
+        condition: service_started
+    restart: always
+    networks:
+      - orchware-network

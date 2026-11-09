@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Orchware.Frontoffice.API.Common.CustomExceptions;
-using Orchware.Frontoffice.API.Common.Pagginations;
+using Utilities.Pagination;
 
 namespace Orchware.Frontoffice.API.Features.Products.FilteredProducts;
 
@@ -38,7 +38,7 @@ public class FilteredProductsController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	public async Task<ActionResult<List<FilteredProductsDto>>> FilteredProducts([FromBody] RequestFilterPaggination requestFilter,
+	public async Task<ActionResult<List<FilteredProductsDto>>> FilteredProducts([FromBody] RequestFilterPagination requestFilter,
 		CancellationToken cancellationToken)
 	{
 		return Ok(await _mediator.Send(new FilteredProductsCommand(requestFilter), cancellationToken));

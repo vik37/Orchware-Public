@@ -3,6 +3,7 @@ using FileStorage.Enums;
 using FileStorage.FileFormatServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Orchware.Backoffice.Domain.Entities.Settings;
 using Orchware.Backoffice.Domain.Entities.Inventory;
 using Orchware.Backoffice.Domain.Enums;
 using Polly;
@@ -60,6 +61,9 @@ public class OrchwareBackInitializer
 
 						_context.Shelf.AddRange(shelves);
 						await _context.SaveChangesAsync();
+
+						if(!_context.PaymentRules.Any())
+							await PaymentRuleSeed();
 
 						_logger.LogInformation("Database Initializer Finished Successfully");
 					}
@@ -137,5 +141,13 @@ public class OrchwareBackInitializer
 		var hasShelves = await _context.Shelf.AsNoTracking().AnyAsync(token);
 
 		return !hasProducts && !hasShelves;
+	}
+
+	private async Task PaymentRuleSeed()
+	{
+		var rule = new PaymentRules(6,TimeSpan.FromDays(7), 699.99m, 15m, 30m);
+
+		await _context.PaymentRules.AddAsync(rule);
+		await _context.SaveChangesAsync();
 	}
 }

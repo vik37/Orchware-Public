@@ -26,5 +26,6 @@ public class UserContextService : IUserContextService
 	public string? Role => _contextAccessor.HttpContext?.User.FindAll(ClaimTypes.Role)
 																.Select(r => r.Value)
 																.FirstOrDefault(x => x.Contains("manager") 
-																				|| x.Contains("warehouseman"));
+																				|| x.Contains("warehouseman")
+																				|| x.Contains("admin"));
 }

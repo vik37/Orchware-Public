@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using Orchware.Frontoffice.API.Common.Pagginations;
+using Utilities.Pagination;
 
 namespace Orchware.Frontoffice.API.Features.Products.FilteredProducts;
 
-public record FilteredProductsCommand(RequestFilterPaggination Filter) 
-	: IRequest<ResponseFilterPaggination<List<FilteredProductsDto>>>{}
+public record FilteredProductsCommand(RequestFilterPagination Filter) 
+	: IRequest<ResponsePagination<List<FilteredProductsDto>>>{}

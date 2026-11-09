@@ -65,11 +65,13 @@ public class FileServiceFactory : IFileServiceFactory, IDisposable
 		private readonly IDisposable _disposable1;
 		private readonly IDisposable _disposable2;
 
+#nullable disable
 		public DisposableWrapper(IDisposable disposable1, IDisposable disposable2 = null)
 		{
 			_disposable1 = disposable1;
 			_disposable2 = disposable2;
 		}
+#nullable enable
 
 		public void Dispose()
 		{

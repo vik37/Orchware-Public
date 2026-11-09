@@ -89,6 +89,15 @@
         "attributes": {}
       },
       {
+        "id": "2d1c5dd5-78c4-4b61-a675-bda85aefccf1",
+        "name": "admin",
+        "description": "With this role, only you can test payment simulation.",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "4b6e8ee2-74c1-4f65-8171-129fa7224c4b",
+        "attributes": {}
+      },
+      {
         "id": "bcfa6172-49af-4c20-9cdb-b14107b1053b",
         "name": "uma_authorization",
         "description": "${role_uma_authorization}",
@@ -333,6 +342,7 @@
       "security-admin-console": [],
       "admin-cli": [],
       "account-console": [],
+      "orchware-notifications-dev": [],
       "broker": [
         {
           "id": "5014633f-44dc-406e-a5f4-dcb0921f770f",
@@ -717,12 +727,12 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://localhost:7160/*",
-        "http://localhost:4040/*"
+        "http://localhost:4050/*",
+        "https://localhost:7201/*"
       ],
       "webOrigins": [
-        "https://localhost:7160",
-        "http://localhost:4040"
+        "https://localhost:7201",
+        "http://localhost:4050"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -736,7 +746,7 @@
       "protocol": "openid-connect",
       "attributes": {
         "oidc.ciba.grant.enabled": "false",
-        "client.secret.creation.time": "1753439975",
+        "client.secret.creation.time": "1793111980",
         "backchannel.logout.session.required": "true",
         "post.logout.redirect.uris": "+",
         "display.on.consent.screen": "false",
@@ -823,12 +833,12 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "https://localhost:7169/*",
+        "https://localhost:7264/*",
         "http://localhost:5050/*"
       ],
       "webOrigins": [
         "http://localhost:5050",
-        "https://localhost:7169"
+        "https://localhost:7264"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -844,6 +854,61 @@
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
         "post.logout.redirect.uris": "+",
+        "display.on.consent.screen": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    },
+    {
+      "id": "4f14d24f-8230-43a2-8588-5e598b19ffa5",
+      "clientId": "orchware-notifications-dev",
+      "name": "",
+      "description": "",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "redirectUris": [
+        "http://localhost:6050/*",
+        "https://localhost:7213/*"
+      ],
+      "webOrigins": [
+        "http://localhost:6050",
+        "https://localhost:7213"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "publicClient": true,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "post.logout.redirect.uris": "https://localhost:7213",
         "display.on.consent.screen": "false",
         "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false"
@@ -1578,13 +1643,13 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-role-list-mapper",
             "saml-user-property-mapper",
-            "oidc-usermodel-property-mapper",
-            "oidc-usermodel-attribute-mapper",
-            "oidc-address-mapper",
             "saml-user-attribute-mapper",
             "oidc-full-name-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "oidc-usermodel-property-mapper",
+            "oidc-address-mapper",
+            "saml-role-list-mapper",
             "oidc-sha256-pairwise-sub-mapper"
           ]
         }
@@ -1644,14 +1709,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-usermodel-property-mapper",
-            "saml-role-list-mapper",
-            "oidc-full-name-mapper",
-            "oidc-address-mapper",
-            "saml-user-property-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
             "oidc-usermodel-attribute-mapper",
-            "saml-user-attribute-mapper"
+            "saml-role-list-mapper",
+            "saml-user-attribute-mapper",
+            "oidc-usermodel-property-mapper",
+            "oidc-full-name-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
+            "oidc-address-mapper",
+            "saml-user-property-mapper"
           ]
         }
       }

@@ -56,7 +56,7 @@ public class CompanyRegistrationHandler : IRequestHandler<CompanyRegistrationCom
 			Email = request.CompanyEmail,
 			Address = request.CompanyAddress,
 			Phone = request.CompanyPhoneNumber,
-			Budget = (decimal)new Random().NextDouble() * 10000m
+			Budget = Random.Shared.Next(100000, 1000001) + ((decimal)Random.Shared.Next(0, 100) / 100m)
 		};
 
 		await _context.Company.AddAsync(company, cancellationToken);

@@ -12,7 +12,7 @@ using Orchware.Backoffice.Application.Features.Shared.Enums;
 namespace Orchware.Backoffice.API.Controllers
 {
 	[Route("api/inventory")]
-	[EnableRateLimiting("slide-by-ip")]
+	[EnableRateLimiting("limit-by-user-query")]
 	[Authorize(Roles = "manager, warehouseman")]
 	[ApiController]
 	public class InventoryController : ControllerBase
@@ -38,6 +38,7 @@ namespace Orchware.Backoffice.API.Controllers
 		/// <returns>Get Shelf Description DTO, including a List of Shelves with their brief details in list of products</returns>
 		[HttpGet]
 		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status429TooManyRequests)]
 		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 		public async Task<IActionResult> Get(CancellationToken token)
 		{
@@ -58,6 +59,7 @@ namespace Orchware.Backoffice.API.Controllers
 		/// <returns>List of Shelves by Seasonal Fruits</returns>
 		[HttpGet("season/{seasonalFruits}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status429TooManyRequests)]
 		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 		public async Task<IActionResult> Get([FromRoute] SeasonalFruits seasonalFruits, CancellationToken token)
 		{
@@ -78,6 +80,7 @@ namespace Orchware.Backoffice.API.Controllers
 		/// <returns>Shelf DTO, including including the product that is placed on the shelf.</returns>
 		[HttpGet("shelf/{id:int}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status429TooManyRequests)]
 		[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 		public async Task<IActionResult> GetSpecificShelfById([FromRoute] int id, CancellationToken token)
 		{

@@ -10,5 +10,7 @@ public interface ISqlQueryBuilder
 	ISqlQueryBuilder Join(string joinType, string table, string onCondition);
 	ISqlQueryBuilder GroupBy(string columns);
 
+	ISqlQueryBuilder SkipTake(int pageIndex, int pageSize);
+
 	string Build(bool autoRestore = true);
 }

@@ -96,60 +96,122 @@ namespace Orchware.Backoffice.Infrastructure.Persistence.Migrations
                     b.ToTable("Shelf", "inventory");
                 });
 
+            modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Orders.Installment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnOrder(3);
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(2);
+
+                    b.Property<string>("InstallmentCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnOrder(6);
+
+                    b.Property<string>("InvoiceUrl")
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnOrder(8);
+
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(4);
+
+                    b.Property<DateTime?>("PaidOnDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(5);
+
+                    b.Property<int>("PaymentInfoId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(7);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentInfoId");
+
+                    b.ToTable("Installment", "ordering");
+                });
+
             modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Orders.Order", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(1)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)")
-                        .HasColumnOrder(5);
+                        .HasColumnName("Amount");
 
-                    b.Property<int>("CompanyId")
+                    b.Property<string>("CancellationReason")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("CancellationReason");
+
+                    b.Property<int>("CancelledBy")
                         .HasColumnType("int")
-                        .HasColumnOrder(3);
+                        .HasColumnName("CancelledBy");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
-                        .HasColumnOrder(9);
+                        .HasColumnName("CreatedDate");
 
                     b.Property<int?>("Discount")
                         .HasColumnType("int")
-                        .HasColumnOrder(7);
+                        .HasColumnName("Discount");
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2")
-                        .HasColumnOrder(10);
-
-                    b.Property<DateTime?>("OrderDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(4);
+                        .HasColumnName("ModifiedDate");
 
                     b.Property<string>("OrderNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(8);
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("OrderNumber");
 
-                    b.Property<string>("Payment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnOrder(11);
+                    b.Property<DateTime>("OrderedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("OrderedDate");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(2);
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)")
-                        .HasColumnOrder(6);
+                        .HasColumnName("TotalAmount");
+
+                    b.Property<string>("VisibilityLevel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("VisibilityLevel");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Order", "order");
+                    b.HasIndex("OrderNumber")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Order_OrderNumber");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Order_Status");
+
+                    b.HasIndex("VisibilityLevel")
+                        .HasDatabaseName("IX_Order_VisibilityLevel");
+
+                    b.ToTable("Order", "ordering", t =>
+                        {
+                            t.HasTrigger("[ordering].[TR_Orders_UpdateProcessingLevel]");
+                        });
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
             modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Orders.OrderDetails", b =>
@@ -167,31 +229,216 @@ namespace Orchware.Backoffice.Infrastructure.Persistence.Migrations
 
                     b.Property<decimal>("PricePerUnit")
                         .HasColumnType("decimal(18,2)")
+                        .HasColumnName("PricePerUnit")
                         .HasColumnOrder(5);
 
-                    b.Property<string>("Products")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnOrder(3);
-
-                    b.Property<float>("Quantity")
-                        .HasColumnType("real")
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("Quantity")
                         .HasColumnOrder(4);
+
+                    b.Property<int>("ShelfProductId")
+                        .HasColumnType("int")
+                        .HasColumnName("ShelfProductId")
+                        .HasColumnOrder(9);
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)")
+                        .HasColumnName("TotalPrice")
                         .HasColumnOrder(7);
 
                     b.Property<string>("UnitOfMeasure")
                         .IsRequired()
                         .HasColumnType("nvarchar(50)")
+                        .HasColumnName("UnitOfMeasure")
                         .HasColumnOrder(6);
+
+                    b.Property<string>("_product")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Product")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("_shelfCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("ShelfCode")
+                        .HasColumnOrder(8);
 
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderDetails", "order");
+                    b.ToTable("OrderDetails", "ordering");
+                });
+
+            modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Orders.PaymentInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("AmountPerInstallment")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("AmountPerInstallment")
+                        .HasColumnOrder(9);
+
+                    b.Property<DateTime?>("FinalInstallmentDueDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("FinalInstallmentDueDate")
+                        .HasColumnOrder(10);
+
+                    b.Property<string>("InvoiceUrl")
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("InvoiceUrl")
+                        .HasColumnOrder(11);
+
+                    b.Property<bool>("IsPaidInFull")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsPaidInFull")
+                        .HasColumnOrder(6);
+
+                    b.Property<int?>("NumberOfInstallments")
+                        .HasColumnType("int")
+                        .HasColumnName("NumberOfInstallments")
+                        .HasColumnOrder(8);
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(2);
+
+                    b.Property<DateTime?>("PaidInFullDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PaidInFullDate")
+                        .HasColumnOrder(7);
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("PaymentDate")
+                        .HasColumnOrder(5);
+
+                    b.Property<string>("PaymentNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("PaymentNumber")
+                        .HasColumnOrder(3);
+
+                    b.Property<bool>("WillBePaidInFull")
+                        .HasColumnType("bit")
+                        .HasColumnName("WillBePaidInFull")
+                        .HasColumnOrder(4);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("PaymentInfo", "ordering");
+                });
+
+            modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Proccessing.BillingTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(11);
+
+                    b.Property<int?>("InstallmentId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(5);
+
+                    b.Property<int?>("InstalmentNumber")
+                        .HasColumnType("int")
+                        .HasColumnOrder(6);
+
+                    b.Property<bool>("IsFullPayment")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(4);
+
+                    b.Property<string>("LastErrorMessage")
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasColumnOrder(10);
+
+                    b.Property<int?>("NumberOfInstallments")
+                        .HasColumnType("int")
+                        .HasColumnOrder(7);
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(2);
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(12);
+
+                    b.Property<int>("RetryCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnOrder(9);
+
+                    b.Property<DateTime?>("ScheduledFor")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(8);
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnOrder(3);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status", "InstallmentId");
+
+                    b.ToTable("BillingTask", "Processing");
+                });
+
+            modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Settings.PaymentRules", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AllowDiscountModification")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnOrder(7);
+
+                    b.Property<int>("GracePeriod")
+                        .HasColumnType("int")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("MaxAllowedInstallments")
+                        .HasColumnType("int")
+                        .HasColumnOrder(2);
+
+                    b.Property<decimal>("MinimumOrderAmountForDiscount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnOrder(4);
+
+                    b.Property<decimal>("OrderAmountDiscountPercentage")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnOrder(5);
+
+                    b.Property<decimal>("PayImmediatelyDiscountPercentage")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnOrder(6);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PaymentRules", "settings");
                 });
 
             modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Shipping.Shipment", b =>
@@ -235,55 +482,90 @@ namespace Orchware.Backoffice.Infrastructure.Persistence.Migrations
                     b.Navigation("Shelf");
                 });
 
+            modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Orders.Installment", b =>
+                {
+                    b.HasOne("Orchware.Backoffice.Domain.Entities.Orders.PaymentInfo", null)
+                        .WithMany("Installments")
+                        .HasForeignKey("PaymentInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Orders.Order", b =>
                 {
-                    b.OwnsOne("Orchware.Backoffice.Domain.Entities.Orders.Company", "Company", b1 =>
+                    b.OwnsOne("Orchware.Backoffice.Domain.Entities.Orders.Buyer", "Buyer", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("uniqueidentifier");
 
-                            b1.Property<string>("Buyer")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
                             b1.Property<string>("CompanyAddress")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 
+                            b1.Property<string>("CompanyCity")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(100)");
+
                             b1.Property<string>("CompanyEmail")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasColumnType("nvarchar(400)");
+
+                            b1.Property<string>("CompanyLocation")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(250)");
+
+                            b1.Property<string>("CompanyName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(550)");
+
+                            b1.Property<string>("CompanyPhoneNumber")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(30)");
+
+                            b1.Property<DateTime>("CompanyRegisteredDate")
+                                .HasColumnType("datetime2");
 
                             b1.Property<string>("JobTitle")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasColumnType("nvarchar(850)");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(550)");
 
                             b1.Property<string>("PersonalEmail")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasColumnType("nvarchar(400)");
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("Order", "order");
+                            b1.ToTable("Order", "ordering");
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");
                         });
 
-                    b.Navigation("Company")
+                    b.Navigation("Buyer")
                         .IsRequired();
                 });
 
             modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Orders.OrderDetails", b =>
                 {
-                    b.HasOne("Orchware.Backoffice.Domain.Entities.Orders.Order", "Order")
+                    b.HasOne("Orchware.Backoffice.Domain.Entities.Orders.Order", null)
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
 
-                    b.Navigation("Order");
+            modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Orders.PaymentInfo", b =>
+                {
+                    b.HasOne("Orchware.Backoffice.Domain.Entities.Orders.Order", null)
+                        .WithOne("PaymentInfo")
+                        .HasForeignKey("Orchware.Backoffice.Domain.Entities.Orders.PaymentInfo", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Inventory.Shelf", b =>
@@ -294,6 +576,14 @@ namespace Orchware.Backoffice.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Orders.Order", b =>
                 {
                     b.Navigation("OrderDetails");
+
+                    b.Navigation("PaymentInfo")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Orchware.Backoffice.Domain.Entities.Orders.PaymentInfo", b =>
+                {
+                    b.Navigation("Installments");
                 });
 #pragma warning restore 612, 618
         }

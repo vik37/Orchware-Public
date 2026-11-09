@@ -1,6 +1,6 @@
 ﻿using DbQueryBuilder.SqlPremmissionProvider;
 using FluentValidation;
-using Orchware.Frontoffice.API.Common.Pagginations;
+using Utilities.Pagination;
 
 namespace Orchware.Frontoffice.API.Features.Products.FilteredProducts;
 

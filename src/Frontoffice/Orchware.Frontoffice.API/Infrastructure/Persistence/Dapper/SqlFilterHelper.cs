@@ -1,5 +1,5 @@
-﻿using Orchware.Frontoffice.API.Common.Pagginations;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
+using Utilities.Pagination;
 
 namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Dapper;
 

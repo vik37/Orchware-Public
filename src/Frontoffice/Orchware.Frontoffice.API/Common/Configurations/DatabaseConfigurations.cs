@@ -24,6 +24,9 @@ public static class DatabaseConfigurations
 
 				sqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
 			});
+
+			opt.ConfigureWarnings(warnings =>
+				warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.ColumnOrderIgnoredWarning));
 		});
 
 		services.AddHealthChecks().AddDbContextCheck<OrchwareDbContext>();
