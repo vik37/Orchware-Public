@@ -365,7 +365,7 @@ To simulate real-world B2B transactional workflows without external payment gate
     * `OrderPreparationFinishedDomainEventHandler.cs`
     * `OrderCancelledDomainEventHandler.cs`
 
-### - $${\color{red}Backoffice-Worker -}$$ 
+### - $${\color{red}Backoffice Worker -}$$ 
 ⏱  **Background Billing Worker Service & Azure Cosmos DB Integration**
 
 To automate the financial and installment billing lifecycle after a manager confirms an order, Orchware utilizes a dedicated **Background Worker Service** running on a scheduled Cron expression:
