@@ -47,4 +47,15 @@ public class DapperContext
 
 		return (totalCount, data);
 	}
+
+	public async Task<SqlMapper.GridReader> ExecuteMultipleStoredProcedureAsync(
+		string storedProcedure,
+		DynamicParameters parameters)
+	{
+		var connection = CreateConnection(); 
+		return await connection.QueryMultipleAsync(
+			storedProcedure,
+			parameters,
+			commandType: CommandType.StoredProcedure);
+	}
 }

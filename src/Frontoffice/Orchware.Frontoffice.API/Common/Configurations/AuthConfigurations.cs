@@ -15,7 +15,7 @@ public static class AuthConfigurations
 				{
 					var roles = ctx.User.FindAll(ClaimTypes.Role).Select(r => r.Value);
 					var hasUserRole = roles.Contains("user");
-					var isEmployee = roles.Any(r => new[] { "manager", "warehouseman" }.Contains(r));
+					var isEmployee = roles.Any(r => new[] { "manager", "warehouseman", "admin" }.Contains(r));
 
 					return hasUserRole && !isEmployee;
 				});

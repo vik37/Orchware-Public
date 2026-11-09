@@ -75,7 +75,58 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Company");
+                    b.ToTable("Company", t =>
+                        {
+                            t.HasTrigger("[dbo].[TR_Company_UpdateName]");
+                        });
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+                });
+
+            modelBuilder.Entity("Orchware.Frontoffice.API.Domain.Installment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnOrder(4);
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(3);
+
+                    b.Property<string>("InvoiceUrl")
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("InvoiceUrl")
+                        .HasColumnOrder(7);
+
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(5);
+
+                    b.Property<DateTime?>("PaidOnDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(2);
+
+                    b.Property<string>("_installmentCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(25)")
+                        .HasColumnName("InstallmentCode")
+                        .HasColumnOrder(6);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentId");
+
+                    b.ToTable("Installment");
                 });
 
             modelBuilder.Entity("Orchware.Frontoffice.API.Domain.Order", b =>
@@ -86,25 +137,21 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
                         .HasColumnOrder(1)
                         .HasDefaultValueSql("NEWSEQUENTIALID()");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnOrder(5);
-
                     b.Property<int>("CompanyId")
                         .HasColumnType("int")
                         .HasColumnOrder(3);
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
-                        .HasColumnOrder(10);
+                        .HasColumnOrder(8);
 
                     b.Property<int?>("Discount")
                         .HasColumnType("int")
-                        .HasColumnOrder(7);
+                        .HasColumnOrder(5);
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2")
-                        .HasColumnOrder(11);
+                        .HasColumnOrder(9);
 
                     b.Property<DateTime?>("OrderDate")
                         .HasColumnType("datetime2")
@@ -112,21 +159,17 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("OrderNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(8);
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnOrder(6);
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)")
                         .HasColumnOrder(2);
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnOrder(6);
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(9);
+                        .HasColumnOrder(7);
 
                     b.HasKey("Id");
 
@@ -158,8 +201,8 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
                         .HasColumnType("int")
                         .HasColumnOrder(3);
 
-                    b.Property<float>("Quantity")
-                        .HasColumnType("real")
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)")
                         .HasColumnOrder(4);
 
                     b.Property<decimal>("TotalPrice")
@@ -175,8 +218,6 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.HasIndex("ProductId");
-
                     b.ToTable("OrderDetails");
                 });
 
@@ -189,37 +230,112 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(550)")
-                        .HasColumnOrder(2);
+                    b.Property<decimal?>("AmountPerInstallment")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnOrder(10);
 
-                    b.Property<int>("MaxsimumAllowedNumberOfMonths")
-                        .HasColumnType("int")
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(13);
+
+                    b.Property<DateTime?>("FinalInstallmentDueDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(11);
+
+                    b.Property<string>("InvoiceUrl")
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("InvoiceUrl")
+                        .HasColumnOrder(15);
+
+                    b.Property<bool>("IsPaidInFull")
+                        .HasColumnType("bit")
                         .HasColumnOrder(7);
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(14);
+
+                    b.Property<int?>("NumberOfInstallments")
+                        .HasColumnType("int")
+                        .HasColumnOrder(9);
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(3);
 
-                    b.Property<bool>("PayImmediately")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(5);
+                    b.Property<DateTime?>("PaidInFullDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(8);
 
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2")
-                        .HasColumnOrder(4);
+                        .HasColumnOrder(5);
 
-                    b.Property<DateTime?>("SelectedPaymentDate")
-                        .HasColumnType("datetime2")
+                    b.Property<int>("PaymentRuleId")
+                        .HasColumnType("int")
+                        .HasColumnOrder(12);
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(550)")
+                        .HasColumnOrder(2);
+
+                    b.Property<bool>("WillBePaidInFull")
+                        .HasColumnType("bit")
                         .HasColumnOrder(6);
+
+                    b.Property<string>("_paymentNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("PaymentNumber")
+                        .HasColumnOrder(4);
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId", "CustomerId")
+                    b.HasIndex("PaymentRuleId");
+
+                    b.HasIndex("OrderId", "UserId")
                         .IsUnique();
 
                     b.ToTable("Payment");
+                });
+
+            modelBuilder.Entity("Orchware.Frontoffice.API.Domain.PaymentRules", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnOrder(1);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GracePeriod")
+                        .HasColumnType("int")
+                        .HasColumnOrder(3);
+
+                    b.Property<int>("MaxAllowedInstallments")
+                        .HasColumnType("int")
+                        .HasColumnOrder(2);
+
+                    b.Property<int>("MaximumPaymentPeriod")
+                        .HasColumnType("int")
+                        .HasColumnOrder(4);
+
+                    b.Property<decimal>("MinimumOrderAmountForDiscount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnOrder(5);
+
+                    b.Property<decimal>("OrderAmountDiscountPercentage")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnOrder(6);
+
+                    b.Property<decimal>("PayImmediatelyDiscountPercentage")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnOrder(7);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PaymentRules");
                 });
 
             modelBuilder.Entity("Orchware.Frontoffice.API.Domain.Product", b =>
@@ -300,6 +416,17 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
                     b.ToTable("User");
                 });
 
+            modelBuilder.Entity("Orchware.Frontoffice.API.Domain.Installment", b =>
+                {
+                    b.HasOne("Orchware.Frontoffice.API.Domain.Payment", "Payment")
+                        .WithMany("Installments")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+                });
+
             modelBuilder.Entity("Orchware.Frontoffice.API.Domain.Order", b =>
                 {
                     b.HasOne("Orchware.Frontoffice.API.Domain.Company", "Company")
@@ -327,15 +454,18 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Orchware.Frontoffice.API.Domain.Product", "Product")
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Orchware.Frontoffice.API.Domain.Payment", b =>
+                {
+                    b.HasOne("Orchware.Frontoffice.API.Domain.PaymentRules", "Rules")
                         .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("PaymentRuleId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
+                    b.Navigation("Rules");
                 });
 
             modelBuilder.Entity("Orchware.Frontoffice.API.Domain.User", b =>
@@ -358,6 +488,11 @@ namespace Orchware.Frontoffice.API.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Orchware.Frontoffice.API.Domain.Order", b =>
                 {
                     b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("Orchware.Frontoffice.API.Domain.Payment", b =>
+                {
+                    b.Navigation("Installments");
                 });
 
             modelBuilder.Entity("Orchware.Frontoffice.API.Domain.User", b =>

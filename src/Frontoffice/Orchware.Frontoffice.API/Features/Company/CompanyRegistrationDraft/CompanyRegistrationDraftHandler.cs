@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using Orchware.Frontoffice.API.Common.Contracts;
 
 namespace Orchware.Frontoffice.API.Features.Company.CompanyRegistrationDraft;
@@ -8,14 +7,12 @@ public class CompanyRegistrationDraftHandler : IRequestHandler<CompanyRegistrati
 {
 	private readonly IRedisDistributedCacheService _redisDistributedCacheService;
 	private readonly IUserContextService _userContextService;
-	private readonly IMapper _mapper;
 
 	public CompanyRegistrationDraftHandler(IRedisDistributedCacheService redisDistributedCacheService,
-		IUserContextService userContextService, IMapper mapper)
+		IUserContextService userContextService)
 	{
 		_redisDistributedCacheService = redisDistributedCacheService;
 		_userContextService = userContextService;
-		_mapper = mapper;
 	}
 
 	public async Task<Unit> Handle(CompanyRegistrationDraftCommand request, CancellationToken cancellationToken)
@@ -26,8 +23,22 @@ public class CompanyRegistrationDraftHandler : IRequestHandler<CompanyRegistrati
 			return Unit.Value;
 
 		string key = $"company_user_draft:{_userContextService.Id}";
-		await _redisDistributedCacheService.SetData<CompanyRegistrationDraft>(key, _mapper.Map<CompanyRegistrationDraft>(request), TimeSpan.FromDays(7));
+		await _redisDistributedCacheService.SetData<Infrastructure.Cache.Models.CompanyRegistrationDraft>(key, MapRequestToCompanyRegistrationDraft(request), TimeSpan.FromDays(7));
 
 		return Unit.Value;
+	}
+
+	private Infrastructure.Cache.Models.CompanyRegistrationDraft MapRequestToCompanyRegistrationDraft(CompanyRegistrationDraftCommand request)
+	{
+		return new Infrastructure.Cache.Models.CompanyRegistrationDraft
+		{
+			CompanyName = request.CompanyName,
+			CompanyAddress = request.CompanyAddress,
+			CompanyCity = request.CompanyCity,
+			CompanyEmail = request.CompanyEmail,
+			CompanyLocation = request.CompanyLocation,
+			CompanyPhoneNumber = request.CompanyPhoneNumber,
+			JobTitle = request.JobTitle
+		};
 	}
 }

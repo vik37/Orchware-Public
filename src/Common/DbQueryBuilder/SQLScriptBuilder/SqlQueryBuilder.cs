@@ -9,6 +9,7 @@ public class SqlQueryBuilder : ISqlQueryBuilder
 	private bool _fromSet = false;
 	private string _orderByClause = "";
 	private string _groupByClause = "";
+	private string _paginationClause = "";
 
 	public ISqlQueryBuilder Select(string columns)
 	{
@@ -78,11 +79,21 @@ public class SqlQueryBuilder : ISqlQueryBuilder
 		return this;
 	}
 
+	public ISqlQueryBuilder SkipTake(int pageIndex, int pageSize)
+	{
+		if (pageSize > 0)
+		{
+			int offset = (pageIndex <= 1 ? 0 : pageIndex - 1) * pageSize;
+			_paginationClause = $"OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
+		}
+		return this;
+	}
+
 	public string Build(bool autoRestore = true)
 	{
-		var result = $"SELECT {string.Join(", ", _columns)} {Environment.NewLine}{_queryBuilder.ToString().Trim()} {(!string.IsNullOrEmpty(_groupByClause)?$"{Environment.NewLine}{_groupByClause}":"")} {Environment.NewLine}{_orderByClause}".Trim();
+		var result = $"SELECT {string.Join(", ", _columns)} {Environment.NewLine}{_queryBuilder.ToString().Trim()} {(!string.IsNullOrEmpty(_groupByClause) ? $"{Environment.NewLine}{_groupByClause}" : "")} {Environment.NewLine}{_orderByClause} {(!string.IsNullOrEmpty(_paginationClause) ? $"{Environment.NewLine}{_paginationClause}" : "")}".Trim();
 
-		if(autoRestore)
+		if (autoRestore)
 			Restore();
 
 		return result;
@@ -95,5 +106,6 @@ public class SqlQueryBuilder : ISqlQueryBuilder
 		_fromSet = false;
 		_orderByClause = string.Empty;
 		_groupByClause = string.Empty;
+		_paginationClause = string.Empty;
 	}
 }

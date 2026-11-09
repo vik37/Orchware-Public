@@ -19,7 +19,6 @@ public class OrderStatus : ValueObject
 		yield return Color;
 	}
 
-	public static OrderStatus Pending => new OrderStatus("Pending", "#f5ef38");
 	public static OrderStatus Requested => new OrderStatus("Requested", "#bed973");
 	public static OrderStatus Confirmed => new OrderStatus("Confirmed", "#fa9052");
 	public static OrderStatus InPreparation => new OrderStatus("InPreparation", "#18f2e7");
@@ -29,6 +28,19 @@ public class OrderStatus : ValueObject
 
 	public static IEnumerable<OrderStatus> GetAllStatuses() => new[]
 	{
-		Pending, Requested, Confirmed, InPreparation, AwaitingDispatch, Approved, Cancelled
+		Requested, Confirmed, InPreparation, AwaitingDispatch, Approved, Cancelled
 	};
+
+	private static readonly Dictionary<OrderStatus, List<OrderStatus>> _transitions = new()
+	{
+		{ OrderStatus.Requested, new() { OrderStatus.Confirmed, OrderStatus.Cancelled } },
+		{ OrderStatus.Confirmed, new() { OrderStatus.InPreparation, OrderStatus.Cancelled } },
+		{ OrderStatus.InPreparation, new() { OrderStatus.AwaitingDispatch, OrderStatus.Cancelled } },
+		{ OrderStatus.AwaitingDispatch, new() { OrderStatus.Approved, OrderStatus.Cancelled } },
+		{ OrderStatus.Approved, new() { } },
+        { OrderStatus.Cancelled, new() { } }
+    };
+
+	public static bool CanTransition(OrderStatus from, OrderStatus to)
+		=> _transitions.TryGetValue(from, out var nextStates) && nextStates.Contains(to);
 }

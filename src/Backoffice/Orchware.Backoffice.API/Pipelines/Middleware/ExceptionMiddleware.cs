@@ -59,6 +59,16 @@ public class ExceptionMiddleware
 				};
 				_logger.LogWarning("HTTP Status: {HTTP_STATUS}, Message: {MESSAGE}", httpStatusCode, notFoundException.Message);
 				break;
+			case ForbiddenException forbiddenException:
+				httpStatusCode = HttpStatusCode.Forbidden;
+				problem = new CustomProblemDetails
+				{
+					Title = forbiddenException.Message,
+					Status = (int)httpStatusCode,
+					Type = nameof(ForbiddenException),
+				};
+				_logger.LogWarning("HTTP Status: {HTTP_STATUS}, Message: {MESSAGE}", httpStatusCode, forbiddenException.Message);
+				break;
 			default:
 				problem = new CustomProblemDetails
 				{

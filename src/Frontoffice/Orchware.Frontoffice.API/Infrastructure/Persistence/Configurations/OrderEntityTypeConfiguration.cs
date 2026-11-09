@@ -29,33 +29,26 @@ public class OrderEntityTypeConfiguration : IEntityTypeConfiguration<Order>
 		builder.Property(x => x.OrderDate)
 			.HasColumnOrder(4);
 
-		builder.Property(x => x.Amount)
-			.HasColumnType("decimal(18,2)")
-			.HasColumnOrder(5)
-			.IsRequired();
-
-		builder.Property(x => x.TotalAmount)
-			.HasColumnType("decimal(18,2)")
-			.HasColumnOrder(6)
-			.IsRequired();
-
 		builder.Property(x => x.Discount)
-			.HasColumnOrder(7);
+			.HasColumnOrder(5);
 
 		builder.Property(x => x.OrderNumber)
-			.HasColumnType("nvarchar(100)")
-			.HasColumnOrder(8)
+			.HasColumnType("nvarchar(20)")
+			.HasColumnOrder(6)
 			.IsRequired();
 
 		builder.Property(x => x.UserId)
 			.HasColumnType("uniqueidentifier")
-			.HasColumnOrder(9);
+			.HasColumnOrder(7);
 
 		builder.Property(x => x.CreatedDate)
-			.HasColumnOrder(10);
+			.HasColumnOrder(8);
 
 		builder.Property(x => x.ModifiedDate)
-			.HasColumnOrder(11);
+			.HasColumnOrder(9);
+
+		builder.Ignore(x => x.Amount);
+		builder.Ignore(x => x.TotalAmount);
 
 		builder.HasMany(x => x.OrderDetails)
 			.WithOne(x => x.Order)

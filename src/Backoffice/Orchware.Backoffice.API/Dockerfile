@@ -2,9 +2,10 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
+#USER $APP_UID
 WORKDIR /app
-EXPOSE 4040
+EXPOSE 4050
+EXPOSE 4070
 
 
 # This stage is used to build the service project
@@ -18,6 +19,7 @@ COPY ["src/Backoffice/Orchware.Backoffice.Infrastructure/Orchware.Backoffice.Inf
 COPY ["src/Common/DbQueryBuilder/DbQueryBuilder.csproj", "src/Common/DbQueryBuilder/"]
 COPY ["src/Common/FileStorage/FileStorage.csproj", "src/Common/FileStorage/"]
 COPY ["src/Common/Utilities/Utilities.csproj", "src/Common/Utilities/"]
+COPY ["src/Common/IntegrationEvents/IntegrationEvents.csproj", "src/Common/IntegrationEvents/"]
 RUN dotnet restore "./src/Backoffice/Orchware.Backoffice.API/Orchware.Backoffice.API.csproj"
 COPY . .
 WORKDIR "/src/src/Backoffice/Orchware.Backoffice.API"

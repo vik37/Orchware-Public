@@ -1,30 +1,28 @@
-﻿using AutoMapper;
-using Dapper;
+﻿using Dapper;
 using MediatR;
-using Orchware.Frontoffice.API.Common.Pagginations;
 using Orchware.Frontoffice.API.Domain;
 using Orchware.Frontoffice.API.Infrastructure.Persistence.Dapper;
+using Utilities.Converters;
+using Utilities.Pagination;
 
 namespace Orchware.Frontoffice.API.Features.Products.FilteredProducts;
 
 public class FilteredProductsHandler : IRequestHandler<
 	FilteredProductsCommand,
-	ResponseFilterPaggination<List<FilteredProductsDto>>>
+	ResponsePagination<List<FilteredProductsDto>>>
 {
 	private readonly DapperContext _dapperContext;
-	private readonly IMapper _mapper;
 
-	public FilteredProductsHandler(DapperContext dapperContext, IMapper mapper)
+	public FilteredProductsHandler(DapperContext dapperContext)
 	{
 		_dapperContext = dapperContext;
-		_mapper = mapper;
 	}
 
-	public async Task<ResponseFilterPaggination<List<FilteredProductsDto>>> Handle(FilteredProductsCommand request, CancellationToken cancellationToken)
+	public async Task<ResponsePagination<List<FilteredProductsDto>>> Handle(FilteredProductsCommand request, CancellationToken cancellationToken)
 	{
 		if (cancellationToken.IsCancellationRequested)
 		{
-			return new ResponseFilterPaggination<List<FilteredProductsDto>>
+			return new ResponsePagination<List<FilteredProductsDto>>
 			{
 				PageIndex = request.Filter.PageIndex + 1,
 				PageSize = request.Filter.PageSize,
@@ -48,12 +46,30 @@ public class FilteredProductsHandler : IRequestHandler<
 
 		var (total, items) = await _dapperContext.ExecutePagedProcedureAsync<Product>("ProductPaginationFilter", parameters);
 
-		return new ResponseFilterPaggination<List<FilteredProductsDto>>
+		return new ResponsePagination<List<FilteredProductsDto>>
 		{
 			PageIndex = request.Filter.PageIndex,
 			PageSize = request.Filter.PageSize,
 			TotalCount = total,
-			Data = _mapper.Map<List<FilteredProductsDto>>(items)
+			Data = items == null ? null : MapFromProductToFilterProductDto(items).ToList()
 		};
+	}
+
+	private IEnumerable<FilteredProductsDto> MapFromProductToFilterProductDto(List<Product> products)
+	{
+		foreach (var product in products)
+		{
+			yield return new FilteredProductsDto
+			{
+				Id = product.Id,
+				AvailableQuantity = product.AvailableQuantity,
+				MinQuantity = product.MinQuantity,
+				SeasonalFruits = product.SeasonalFruits.GetDisplayNameToString(),
+				Name = product.Name,
+				Price = product.Price,
+				Units = product.Units.GetDisplayNameToString(),
+				Image = product.Image
+			};
+		}
 	}
 }

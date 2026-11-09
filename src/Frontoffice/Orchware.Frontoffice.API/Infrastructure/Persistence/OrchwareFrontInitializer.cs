@@ -50,6 +50,9 @@ public class OrchwareFrontInitializer
 						}
 					}
 
+					if (!_context.PaymentRules.Any()) 
+						await PaymentRuleSeed();
+
 					_logger.LogInformation("Database Initializer Finished Successfully");
 				}
 				catch (DbUpdateException ex)
@@ -62,5 +65,22 @@ public class OrchwareFrontInitializer
 				}
 			});
 		}
+	}
+
+	private async Task PaymentRuleSeed()
+	{
+		var rules = new PaymentRules
+		{
+			MaxAllowedInstallments = 6,
+			GracePeriod = TimeSpan.FromDays(7),
+			MaximumPaymentPeriod = TimeSpan.FromDays(30),
+
+			MinimumOrderAmountForDiscount = 699.99m,
+			OrderAmountDiscountPercentage = 15m,
+			PayImmediatelyDiscountPercentage = 30m
+		};
+
+		await _context.PaymentRules.AddAsync(rules);
+		await _context.SaveChangesAsync();
 	}
 }

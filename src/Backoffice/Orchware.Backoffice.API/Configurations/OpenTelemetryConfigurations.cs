@@ -20,6 +20,7 @@ public static class OpenTelemetryConfigurations
 				tracingProvider.SetResourceBuilder(resourceBuilder)
 				.AddAspNetCoreInstrumentation()
 				.AddHttpClientInstrumentation()
+				.AddSource("MassTransit")
 				.AddOtlpExporter(otlp =>
 				{
 					otlp.Endpoint = new Uri(otelSettings!.Endpoint);
@@ -31,8 +32,8 @@ public static class OpenTelemetryConfigurations
 			{
 				matricsProvider.SetResourceBuilder(resourceBuilder)
 								.AddHttpClientInstrumentation()
-								.AddHttpClientInstrumentation()
 								.AddRuntimeInstrumentation()
+								.AddMeter("MassTransit")
 								.AddOtlpExporter(otpl =>
 								{
 									otpl.Endpoint = new Uri(otelSettings!.Endpoint);

@@ -9,9 +9,15 @@ public static class RateLimmiterConfigurations
 		services.AddRateLimiter(options =>
 		{
 			options.RejectionStatusCode = 429;
+
 			options.AddPolicy("slide-by-ip", httpContext =>
-				RateLimitPartition.GetSlidingWindowLimiter(
-					partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
+			{
+				var ip = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+						 ?? httpContext.Connection.RemoteIpAddress?.ToString()
+						 ?? "unknown";
+
+				return RateLimitPartition.GetSlidingWindowLimiter(
+					partitionKey: ip,
 					factory: _ => new SlidingWindowRateLimiterOptions
 					{
 						PermitLimit = 400,
@@ -19,10 +25,16 @@ public static class RateLimmiterConfigurations
 						SegmentsPerWindow = 2,
 						QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
 						QueueLimit = 1
-					}));
+					});
+			});
 
 			options.AddPolicy("fixed-by-ip", httpContext =>
-				RateLimitPartition.GetFixedWindowLimiter(
+			{
+				var ip = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+						 ?? httpContext.Connection.RemoteIpAddress?.ToString()
+						 ?? "unknown";
+
+				return RateLimitPartition.GetFixedWindowLimiter(
 					partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
 					factory: _ => new FixedWindowRateLimiterOptions
 					{
@@ -30,7 +42,9 @@ public static class RateLimmiterConfigurations
 						Window = TimeSpan.FromSeconds(10),
 						QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
 						QueueLimit = 1
-					}));
+					});
+			});
+				
 
 			options.OnRejected = (ctx, token) =>
 			{

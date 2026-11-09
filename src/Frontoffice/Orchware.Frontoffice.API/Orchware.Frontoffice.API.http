@@ -1,21 +1,6 @@
-@Orchware.Frontoffice.API_HostAddress = http://localhost:5262
+@Orchware.Frontoffice.API_HostAddress = http://localhost:5009
 
-POST {{Orchware.Frontoffice.API_HostAddress}}/api/products
-Accept: application/json
-Content-Type: application/json
-{
-  "pageIndex": 1,
-  "pageSize": 10,
-  "orderBy": "Price",
-  "orderDirection": "ASC"
-}
-
-###
-# Get All Seasonal Fruits
-GET {{Orchware.Frontoffice.API_HostAddress}}/api/products/seasonal-fruits
+GET {{Orchware.Frontoffice.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
-# Get All Units of Measure
-GET {{Orchware.Frontoffice.API_HostAddress}}/api/products/units-of-measure
-Accept: application/json

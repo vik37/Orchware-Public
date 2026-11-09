@@ -33,7 +33,6 @@ public class EditUserCompanyJobTitleController : ControllerBase
 	/// <param name="token">Cancellation token</param>
 	/// <exception cref="BadRequestException"></exception>
 	/// <exception cref="ForbiddenException"></exception>
-	/// <exception cref="EntityAlreadyExistsException"></exception>
 	/// <exception cref="Exception"></exception>
 	[HttpPatch]
 	[Authorize(Policy = "NonEmployeeUser")]

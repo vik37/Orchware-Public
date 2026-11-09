@@ -1,0 +1,6 @@
+@Orchware.Notification.API_HostAddress = http://localhost:5184
+
+GET {{Orchware.Notification.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
