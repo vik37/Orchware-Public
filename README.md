@@ -671,6 +671,20 @@ docker compose -f docker-compose.yml -f docker-compose.application.yml up -d --b
 ```
 ---
 
+### SignalR Test Client
+
+A lightweight standalone HTML utility for testing incoming real-time notifications through the Notification API's SignalR Hub.
+
+It allows developers to establish an authenticated SignalR connection, listen for incoming `ReceiveNotification` events, and inspect received notification payloads directly in the browser console.
+
+Located in:
+
+`tools/signalr-test-client/`
+
+The utility supports local and Docker-based Notification API endpoints. An access token must be supplied locally and is not stored in the repository.
+
+![Result in Browser Console from SignalR Incoming Message Data](git_docs/images/testing_html.png)
+
 ## 📦 **Common Libraries**  
 
 ✅ Manages **file operations** across services:  
