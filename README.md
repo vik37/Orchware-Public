@@ -199,8 +199,7 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 🔹 [Quick Start](#-quick-start)    
 🔹 [Common Libraries](#-common-libraries)  
 🔹 [UML Diagram](#uml-diagram)  
-🔹 [Docker Support](#-docker-support)  
-🔹 [Upcoming Features](#-upcoming-features)    
+🔹 [Docker Support](#-docker-support)    
 🔹 [Additional Context](#additional-context)  
 🔹 [Articles & Publications](#articles--publications)  
 🔹 [License](#license)  
@@ -306,45 +305,134 @@ To simulate real-world B2B transactional workflows without external payment gate
 * **Automated Azure Function Invoice Generation:**  
   * Upon successful balance validation, the settlement triggers an **Azure Function** microservice that dynamically generates a stamped digital invoice (PDF).  
   * **Verified Bank Stamp & Details:** The generated invoice automatically includes structured order items, applicable discounts, payment terms, and official bank verification metadata (*Bank Name, Representative Signature, and Verified Bank Stamp*).
+ 
+![Success Payment Message](git_docs/images/client_email_success_message.png) ![Error Payment Message](git_docs/images/client_email_error_message.png)
 
 ---
 
 ## 📋 **Technical Overview**  
 
-### - $${\color{red}Backoffice}$$  
-✅ Built using **Clean Architecture** and **Domain-Driven Design (DDD)** principles.  
-✅ Manages entities like **Products, Shelves, Orders**.  
-✅ Supports **database seeding, migrations, and file storage**.  
-✅ Uses **Entity Framework Core, Dapper** as ORM.  
+### - $${\color{red}Frontoffice API -}$$ 
+✅ Built using **Vertical Slice Architecture** organized by features (e.g., `Company`, `Orders`, `Payments`, `Products`).  
+✅ **Strict Client Authorization Policy:** Implements custom policy-based authorization (`NonEmployeeUser`) ensuring that endpoints are strictly dedicated to registered external clients. It enforces that users must possess the `user` role while explicitly blocking any internal employee roles (`manager`, `warehouseman`, `admin`).  
+  * *Example Policy Implementation:*
+    ```csharp
+    services.AddAuthorization(opt => 
+    {
+        opt.AddPolicy("NonEmployeeUser", policy => 
+        {
+            policy.RequireAssertion(ctx =>
+            {
+                var roles = ctx.User.FindAll(ClaimTypes.Role).Select(r => r.Value);
+                var hasUserRole = roles.Contains("user");
+                var isEmployee = roles.Any(r => new[] { "manager", "warehouseman", "admin" }.Contains(r));
 
-### - $${\color{red}Frontoffice}$$ 
-✅ Built with **Vertical Slice Architecture** for modularity.  
-✅ Focused on exposing **product API (GET/Pagination/Filters)**.  
-✅ Uses **Entity Framework Cor & Dapper** for efficient database access.  
-✅ Supports **pagination and filtering** out of the box.  
-✅ Redis integration planned for future caching and performance optimization.          
-:curly_loop: $${\color{blue} \Redis - is - currently - used - for - \draft (Company - Feature), with - caching - planned - for - future - performance - tuning.}$$
+                return hasUserRole && !isEmployee;
+            });
+        });
+    });
+    ```
+✅ **Domain Models:** Manages core entities including `Order`, `OrderDetails`, `Company`, `Payment`, `Installment`, `PaymentRules`, `Product`, and `User`.  
+✅ **Event-Driven Integration (RabbitMQ):** Implements robust cross-service communication via Integration Event Consumers (`EmployeeCancelledOrderEventConsumer`, `InvoiceSentIntegrationEventConsumer`, `OrderApprovedIntegrationEventConsumer`, `OrderConfirmedIntegrationEventConsumer`, `OrderPackedIntegrationEventConsumer`, `PaymentRequestedIntegrationEventConsumer`, `PaymentRuleChangedIntegrationEventConsumer`).  
+✅ **Distributed Caching & Locking:** Utilizes **Redis** (`RedisDistributedCacheService`, `RedisLockService`) for high-performance draft management and concurrency control.  
+✅ **Data Access & Security:** Combines **Entity Framework Core** for domain persistence and **Dapper** with custom field permission providers (`OrchwareFrontofficeFieldPremmisionProvider`, `SqlFilterHelper`) for ultra-fast, secure dynamic SQL filtering.
 
 ---
 
-## Technologies Used
-✔ **.NET 8**  
-✔ **Entity Framework Core** (ORM)  
-✔ **Dapper** (ORM)
-✔ **MediatR** (Commands, Queries, Domain Events [Notifications])  
-✔ **FluentValidation** (Dto Models and Command Request Validations)  
-✔ **CsvHelper** (CSV import/export)  
-✔ **Docker** (containerization)  
-✔ **OpenTelemetry** (distributed tracing & metrics instrumentation)
-✔ **OTel Collector** (centralized observability pipeline)
-✔ **Seq** (structured log ingestion & visualization)
-✔ **Grafana** (dashboarding and alerting)
-✔ **Tempo** (distributed trace backend)
-✔ **Prometheus** (metrics scraping & backend)                   
-✔ **Keycloak** (Authentication/Authorization, Single Sign On, OAuht, OIDC)                    
-✔ **Redis** (In-memory distributed cache — currently used for draft storage to reduce DB load and improve responsiveness; caching layer planned for broader performance optimization)
+### - $${\color{red}Backoffice API -}$$ 
+✅ Built using strict **Clean Architecture** and **Domain-Driven Design (DDD)** principles, structured into dedicated layers:
+  * **API Layer (`Orchware.Backoffice.API`):** Web API exposing backoffice endpoints, configurations, pipelines, and controllers, tied directly to the Application layer.
+  * **Application Layer (`Orchware.Backoffice.Application`):** Houses business logic, CQRS features, domain event handlers, and application service registrations.
+  * **Domain Layer (`Orchware.Backoffice.Domain`):** Core domain model containing entities, value objects, domain events, constants, enums, and primitives (aggregates and repository abstractions).
+  * **Infrastructure Layer (`Orchware.Backoffice.Infrastructure`):** Implements EF Core persistence, database migrations, seeding (`OrchwareBackInitializer`), file storage, Redis caching/locking, Azure Cosmos DB integration, and robust event-driven messaging via RabbitMQ.
 
- 
+✅ **Internal Employee Portal & Role-Based Access Control (RBAC):**  
+  * **Target Audience:** Strictly dedicated to internal company employees utilizing the Orchware system.  
+  * **Keycloak SSO Integration:** All user accounts and authentication roles are centrally managed via the main Keycloak realm configured for the project (`OAuth2 / OIDC`).  
+  * **Granular Employee Roles:** Enforces strict role-based access control across three core internal roles:
+    * `admin` — Full system and payment administration.
+    * `manager` — Oversight of orders, payment rules, approvals, and operational controls.
+    * `warehouseman` — Focused on warehouse packing, shipping, and preparation workflows (active from the `In Preparation` stage onward).
+
+✅ **Event-Driven Messaging & Domain Events:**  
+  * **RabbitMQ Integration Event Consumers (MassTransit):**
+    * `CustomerCancelledOrderEventConsumer.cs`
+    * `InvoiceSentIntegrationEventConsumer.cs`
+    * `OrderRequestedIntegrationEventConsumer.cs`
+  * **Domain Event Handlers (Order-Focused):**
+    * `OrderRequestedDomainEventHandler.cs`
+    * `OrderApprovedDomainEventHandler.cs`
+    * `OrderPreparationStartedDomainEventHandler.cs`
+    * `OrderPreparationFinishedDomainEventHandler.cs`
+    * `OrderCancelledDomainEventHandler.cs`
+
+### - $${\color{red}Backoffice-Worker -}$$ 
+⏱  **Background Billing Worker Service & Azure Cosmos DB Integration**
+
+To automate the financial and installment billing lifecycle after a manager confirms an order, Orchware utilizes a dedicated **Background Worker Service** running on a scheduled Cron expression:
+
+* **Cron-Based Execution Flow:**  
+  * Configured via a custom cron job service (`BillingTaskService`), checking for pending billing tasks **every minute**:
+    ```csharp
+    builder.Services.AddCronJob<BillingTaskService>(c =>
+    {
+        c.CronExpression = "0 */1 * * * *";
+        c.TimeZoneInfo = TimeZoneInfo.Local;
+    });
+    ```
+
+* **Automated Processing & Cosmos DB Persistence:**  
+  * The worker queries the database for pending billing tasks, fetches respective order details via shared infrastructure repositories (`Backoffice.Infrastructure`), and securely syncs the document state into **Azure Cosmos DB**.
+
+* **Azure Function Cosmos DB Trigger & Blob Storage:**  
+  * Once data is committed to Azure Cosmos DB, it triggers an external serverless function (hosted in the [azfunc_cosmos_create_invoice](https://github.com/vik37/azfunc_cosmos_create_invoice) repository) which automatically generates the digitally signed PDF invoice and stores it in **Azure Blob Storage**.
+
+### - $${\color{red}Notification API -}$$ 
+🔔 **Notification, Email & Event Grid Service (`Orchware.Notification.API`)**
+
+The Notification Service acts as a centralized, all-in-one hub responsible for handling real-time alerts, messaging, automated event-driven workflows, and closing the transactional order loop:
+
+* **Real-Time Delivery & SignalR Hub:**  
+  * Utilizes `NotificationHub` to push instant, live updates via WebSockets directly to internal stakeholders (**Manager** and **Warehouseman**).
+  * Ingests system-wide notification events asynchronously via **RabbitMQ** event consumers.
+
+* **Smart Notification API & YouTube-Style Pagination:**  
+  * Features dedicated controllers providing flexible retrieval options (`all` vs. `unread`) with optimized offset/chunk loading (fetching initial batches of 10 items that automatically refresh and load more as the user scrolls to the bottom, sorted by creation timestamp).
+  * Supports instant read-status manipulation (automatically marking notifications as read upon interaction).
+
+* **RabbitMQ Integration Event Consumers:**  
+  * Handles cross-service messaging via dedicated consumers:
+    * `InvoiceSentIntegrationEventConsumer.cs`
+    * `ManagerNotificationMessageIntegrationEventConsumer.cs`
+    * `PaymentConfirmedIntegrationEventConsumer.cs`
+    * `PaymentRejectedIntegrationEventConsumer.cs`
+    * `WarehousemanNotificationMessageIntegrationEventConsumer.cs`
+
+* **Automated Azure Event Grid & Email Workflow:**  
+  * **Webhook Listener (`EmailController`):** Once the background billing worker generates and saves a PDF invoice to Azure Blob Storage, Azure Event Grid triggers a `Microsoft.Storage.BlobCreated` event processed by the webhook listener with built-in concurrency protection (`_activeProcessingOrders`) and retry logic.
+  * **Buyer & Manager Dispatch:** Downloads the signed PDF invoice from Azure Blob Storage and dispatches a professionally styled HTML email to the client's personal address, with a mandatory **CC copy sent to the manager** (`manager@viktor-showcase.dev`).
+  * **Status Progression & Warehouse Trigger:** Upon successful delivery, publishes an `InvoiceSentIntegrationEvent` via **MassTransit** to update order states across Frontoffice and Backoffice from `Confirmed` to `InProgress`, instantly notifying the **Warehouseman** to begin physical packaging.
+
+## Technologies Used
+✔ **.NET 8** *(Used across: Backoffice API, Frontoffice API, Notification API, and Billing Background Worker)*  
+✔ **Entity Framework Core (ORM)** *(Used across: Backoffice API & Frontoffice API)*  
+✔ **Dapper (ORM)** *(Used across: Backoffice API & Frontoffice API)*  
+✔ **MediatR (Commands, Queries, Domain Events [Notifications])** *(Used across: Backoffice API & Frontoffice API)*  
+✔ **FluentValidation (Dto Models and Command Request Validations)** *(Used across: Backoffice API & Frontoffice API)*  
+✔ **CsvHelper (CSV import/export)** *(Used in: Frontoffice API)*  
+✔ **MassTransit & MassTransit.RabbitMQ** *(Used across: Backoffice API, Frontoffice API, and Notification API)*  
+✔ **Azure Cosmos DB & Azure Storage Blobs** *(Used in: Notification API & Billing Worker)*  
+✔ **MailKit** *(Used in: Notification API)*  
+✔ **Cronos** *(Used in: Billing Background Worker)*  
+✔ **Docker (containerization)** *(Used across all services)*  
+✔ **OpenTelemetry (distributed tracing & metrics instrumentation)** *(Used across all services)*  
+✔ **OTel Collector (centralized observability pipeline)**  
+✔ **Seq (structured log ingestion & visualization)**  
+✔ **Grafana (dashboarding and alerting)**  
+✔ **Tempo (distributed trace backend)**  
+✔ **Prometheus (metrics scraping & backend)**  
+✔ **Keycloak (Authentication/Authorization, Single Sign-On, OAuth, OIDC)**  
+✔ **Redis (In-memory distributed cache)** *(Used in: Frontoffice API & Backoffice API for draft storage, distributed caching, and locking)*
 
 
 ---
@@ -355,26 +443,51 @@ To simulate real-world B2B transactional workflows without external payment gate
 src/
 │
 ├── Backoffice/
-│   ├── Orchware.Backoffice.API           → Web API for Backoffice operations
-│   ├── Orchware.Backoffice.Application   → Business logic and use cases
-│   ├── Orchware.Backoffice.Domain        → Core domain entities
-│   └── Orchware.Backoffice.Infrastructure → EF Core, file storage, seeding
+│   ├── Orchware.Backoffice.API          → Web API for Backoffice operations
+│   ├── Orchware.Backoffice.Application  → Business logic, CQRS features & domain handlers
+│   ├── Orchware.Backoffice.Domain       → Core domain entities, value objects & primitives
+│   ├── Orchware.Backoffice.Infrastructure → EF Core, Azure Cosmos DB, Redis, RabbitMQ & seeding
+│   └── backoffice-worker                → Cron-based background billing & installment task worker
 │
 ├── Frontoffice/
-│   ├── Orchware.Frontoffice.API           → API for product data
-│   └── Infrastructure                     → Dapper context, database access
+│   └── Orchware.Frontoffice.API         → Vertical Slice Architecture API (Features, MediatR, Dapper)
 │
-├── Common/
-│   ├── FileStorage                        → Abstractions for file handling (CSV, Excel, Azure)
-│   └── DbQueryBuilder                     → Fluent API for SQL queries with Dapper
+├── Notification/
+│   └── Orchware.Notification.API        → Centralized SignalR hub, notification API & Event Grid webhooks
+│
+└── Common/
+    ├── DbQueryBuilder                   → Shared dynamic SQL and query construction helpers
+    ├── FileStorage                      → Centralized file handling abstractions (Blob, local)
+    ├── IntegrationEvents                → Shared cross-service messaging contracts & events
+    └── Utilities                        → Common helper methods, converters & pagination utilities
 ```
 
 ---
 
 ## Setup Instructions  
 🔹 **Prerequisites:**  
-✅ **.NET 8 SDK**  
-✅ **Docker** (optional, for containerized deployment)  
+✅ **.NET 8 SDK** — Required for building and running all microservices and worker tasks.  
+✅ **Docker & Docker Compose** — Recommended for running containerized infrastructure dependencies (SQL Server, Redis, RabbitMQ, Seq, Prometheus, Grafana, and Keycloak).  
+✅ **Microsoft SQL Server** — Relational database instance for Backoffice and Frontoffice persistence (or run via Docker).  
+✅ **Redis** — In-memory distributed cache and locking service (or run via Docker).  
+✅ **RabbitMQ** — Message broker for asynchronous event-driven communication via MassTransit (or run via Docker).  
+✅ **Keycloak** — Identity provider configured for OAuth2 / OIDC authentication and role-based access control (RBAC).
+
+⚙️ **Configuration & Environment Settings:**
+
+To ensure the full event-driven and billing-to-invoice pipeline functions correctly, make sure to provide the required configuration properties in your `appsettings.json` (or environment variables):
+
+```json
+"CosmosDBSettings": {
+  "Endpoint": "[COSMOS_ENDPOINT]",
+  "Secret": "[COSMOS_SECRET]",
+  "Database": "orchwaredb"
+},
+"ExternalURLS": {
+  "StampFunctionUrl": "STAMP_SECRET",
+  "StampFunctionCode": "STAMP_CODE"
+},
+"StorageConnectionString": "[STORAGE_KEY]"
 
 ### **Running the system**  
 
@@ -386,6 +499,14 @@ git clone https://github.com/your-repo/orchware.git
 cd orchware run
 ```
 
+Additionally, for containerized deployments via Docker, ensure you configure the corresponding Keycloak authentication client secret in docker-compose.application.yml:
+
+Find all [&_SECRETS] in docker-compose.application.yml and configure
+```bash
+environment:
+  - Authentication__ClientSecrets=[AUTH_CLIENT_SECRET]
+```
+
 **Setup Dependency** 
 ```Bash
 dotnet restore
@@ -394,6 +515,36 @@ dotnet restore
 ```Bash
 dotnet run --project src/Backoffice/Orchware.Backoffice.API
 dotnet run --project src/Frontoffice/Orchware.Frontoffice.API
+```
+
+### 3. Run the Services
+
+Orchware supports three deployment and execution approaches, depending on your development environment:
+
+* **Option A: Run via .NET CLI (Core APIs)**
+  ```bash
+  dotnet run --project src/Backoffice/Orchware.Backoffice.API
+  dotnet run --project src/Frontoffice/Orchware.Frontoffice.API
+  dotnet run --project src/Backoffice/Orchware.Backoffice.Worker
+  dotnet run --project src/Frontoffice/Orchware.Notification.API
+
+**Option B: Run via Visual Studio (Hybrid Setup)**
+
+Start infrastructure services via Docker first:
+
+```Bash
+docker compose up --build -d keycloak-db keycloak seq tempo prometheus otel-collector grafana redis rabbit mssql
+```
+Then, right-click the solution in Visual Studio, select Configure Startup Projects, and set multiple startup projects to Start (e.g., Frontoffice, Backoffice API, Worker, Notification API, etc.) as shown below:
+
+![Visual Studio SLN Setup](git_docs/images/setup.png)
+
+**Option C: Run Entire System via Docker Compose**
+
+To spin up all microservices, workers, and infrastructure containers together:
+
+```Bash
+docker compose -f docker-compose.yml -f docker-compose.application.yml up -d --build
 ```
 ---
 
@@ -489,19 +640,6 @@ var query = new SqlQueryBuilder()
 
 ---
 
-## 🚀 Upcoming Features  
-- **Notification Service** – Currently under development. It will handle **event tracking and real-time updates** using **SignalR**.  
-- **Email Service / Azure Integration** – Planned for future implementation. This includes potential use of **Azure Functions**, **Logic Apps**, or **SendGrid**.  
-- **Keycloak Integration** – Upcoming for secure **authentication and authorization** with **OpenID Connect**.  
-
-✅ **Angular Frontend** – Already developed and deployed as a responsive UI, fully integrated with the Backoffice and Frontoffice APIs.  
-🔗 [Live Demo](https://viktor-showcase.dev/orchware)
-
-📄 [📘 PDF Documentation](https://eu2.contabostorage.com/2efd0461225649f1ab046e9a2f8101ca:vikstr/documents/Orchware_Description.pdf)  
-_Complete overview of system features, architecture, and development process._
- 
----
-
 ## Additional Context
 
 ### Why is this not a microservices or monolithic architecture?
@@ -533,7 +671,7 @@ The goal is to present a **production-like, modular system** suitable for real-w
 
 ## License
 
-[MIT](https://github.com/vik37/Orchware-Public/blob/main/LICENSE.txt)
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-firebrick.svg)](LICENSE.txt)
 
 ----------------------------------------------------------           
 
