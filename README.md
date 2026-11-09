@@ -38,18 +38,19 @@ Although the core implementation is complete, the project may continue to receiv
 # Agile Methodology - Kanban
 ## 📊 Issue Count by Status ## 📊 Issue Count by Status <!-- STATUS START -->
 
-![Todo](https://img.shields.io/badge/todo-4-blue?style=flat-square)
-![In-progress](https://img.shields.io/badge/in--progress-1-yellow?style=flat-square)
-![Done](https://img.shields.io/badge/done-5-lightgrey?style=flat-square)
-![Qa-test](https://img.shields.io/badge/qa--test-0-pink?style=flat-square)
-![Completed](https://img.shields.io/badge/completed-29-purple?style=flat-square)
+![Todo](https://img.shields.io/badge/todo-2-blue?style=flat-square)
+![In-progress](https://img.shields.io/badge/in--progress-0-yellow?style=flat-square)
+![Done](https://img.shields.io/badge/done-23-lightgrey?style=flat-square)
+![Qa-test](https://img.shields.io/badge/qa--test-7-pink?style=flat-square)
+![Completed](https://img.shields.io/badge/completed-69-purple?style=flat-square)
 
+![Project Kanban Example](git_docs/images/kanban.png)
 <!-- STATUS END -->
 ---
 
 ### 🧱 Tech Stack
 
-![Backend](https://img.shields.io/badge/backend-.NET-512BD4?logo=dotnet) ![Frontend](https://img.shields.io/badge/frontend-Angular-DD0031?logo=angular) ![Containerized](https://img.shields.io/badge/containerized-Docker-2496ED?logo=docker) ![Proxy](https://img.shields.io/badge/reverse%20proxy-NGINX-009639?logo=nginx) ![Serilog](https://img.shields.io/badge/logging-Serilog-4AB197?logo=serilog&logoColor=white)
+![Backend](https://img.shields.io/badge/backend-.NET-512BD4?logo=dotnet) ![C#](https://img.shields.io/badge/language-C%23-239120?logo=csharp&logoColor=white) ![RabbitMQ](https://img.shields.io/badge/messaging-RabbitMQ-FF6600?logo=rabbitmq&logoColor=white) ![Azure](https://img.shields.io/badge/cloud-Azure-0089D6?logo=microsoftazure&logoColor=white) ![Frontend](https://img.shields.io/badge/frontend-Angular-DD0031?logo=angular) ![Containerized](https://img.shields.io/badge/containerized-Docker-2496ED?logo=docker) ![Proxy](https://img.shields.io/badge/reverse%20proxy-NGINX-009639?logo=nginx) ![Serilog](https://img.shields.io/badge/logging-Serilog-4AB197?logo=serilog&logoColor=white)
 ![Seq](https://img.shields.io/badge/logging-Seq-12B886?logo=logstash) ![Tempo](https://img.shields.io/badge/tracing-Tempo-FFB300?logo=grafana) ![Prometheus](https://img.shields.io/badge/metrics-Prometheus-E6522C?logo=prometheus) ![OpenTelemetry](https://img.shields.io/badge/telemetry-OpenTelemetry-262261?logo=opentelemetry) ![Serilog](https://img.shields.io/badge/logging-Serilog-4AB197?logo=serilog&logoColor=white) 
 ![Redis](https://img.shields.io/badge/cache-Redis-DC382D?logo=redis&logoColor=white)
 ---
@@ -85,16 +86,26 @@ To simplify setup and demonstrate the system's security features, you can easily
             * Username: `manager@orchware.com`
             * Password: `manDemo123!`
             * Roles: Ensure this user is assigned the `manager` role (and potentially `user` if needed for general access).
-        * **warehouseman:**
+        * **warehouseman:**   
             * Username: `warehouse@orchware.com`
             * Password: `Whouseman123!`
-            * Roles: Ensure this user is assigned the `warehouseman` role (and potentially `user`).
-        * **(Optional) Regular User:**
-            * **You can register a new user directly through the application's UI.** Any new user registered this way will automatically be assigned the `user` role.
+            * Roles: Ensure this user is assigned the `warehouseman` role (and potentially `user`).        
+      * **administrator:**                  
+      	* Username: `admin@orchware.com`     
+        * Password: `Admin123!`    
+        * Roles: Ensure this user is assigned the `admin` role (and potentially `user`).       
+        * Purpose: Used to simulate customer installment payments through the Payment Settings functionality.       
+      * **(Optional) Regular User:**         
+        * **You can register a new user directly through the application's UI.** Any new user registered this way will automatically be assigned the `user` role.
 
 * **Important Notes for Keycloak Setup:**
        - **Users and Client Secrets:** When exporting and then importing Keycloak Realm JSON, user accounts and client secrets _(confidential clients)_ are not included. They need to be added manually, as shown in the video. _(I'm not fully certain why this is the default behavior or if there's a specific export option to include them, and it's something I plan to investigate further.)_
 
+### 📺 Video (Login) Demonstration
+
+[![Watch the video](https://img.youtube.com/vi/ZpnFk_w-wmE/hqdefault.jpg)](https://www.youtube.com/watch?v=ZpnFk_w-wmE)
+
+> **Click on the image above** to watch the video on YouTube!
 #### Authorization Policies in Backend (.NET)
 
 The backend (`Orchware.Frontoffice.API`) implements custom authorization policies to manage access based on user roles from Keycloak. A key example is the `NonEmployeeUser` policy:
