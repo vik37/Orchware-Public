@@ -215,11 +215,23 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 
 ## 📌 **Business Overview**
 
-**Orchware** is a portfolio project designed to simulate real-world fruit warehouse operations with a structured, modular architecture. Unlike traditional monolithic or microservices approaches, Orchware balances scalability, flexibility, and maintainability through a clear Backoffice & Frontoffice separation.          
-🔹 **Backoffice Service** – Manages inventory, orders, payments, and warehouse logistics           
-🔹 **Frontoffice Service** – Provides customer access to products, order requests, and company registration.          
-🔹 **Common Libraries** – Shared utilities for file handling, structured SQL queries, and validation.           
-This system allows fruit wholesalers to efficiently manage ordering, storage, and distribution operations, ensuring streamlined workflows from order creation to final shipment
+**Orchware** is an independent portfolio project designed to simulate real-world fruit wholesale and warehouse operations through a modular architecture with clearly separated Frontoffice and Backoffice applications.
+
+The system consists of the following main components:
+
+🔹 **Frontoffice Service** – Provides customer access to product browsing, company registration, order placement, order tracking, and payment management.
+
+🔹 **Backoffice Service** – Handles inventory management, order processing, payment-related operations, and warehouse logistics.
+
+🔹 **API Service** – Provides dedicated API functionality supporting the application's business operations.
+
+🔹 **Notification Service** – Handles event-driven customer and manager notifications through email and real-time communication using SignalR (WebSockets). Integrates with **Azure Event Grid** to listen for invoice PDF uploads to **Azure Blob Storage**, retrieve the generated invoices, and deliver them to customers as email attachments, with the manager included in CC. It also communicates with other application services through RabbitMQ integration events.
+
+🔹 **Backoffice Billing Worker** – A scheduled background worker responsible for processing billing tasks, managing installment processing, and initiating invoice PDF generation through Azure Cosmos DB.
+
+🔹 **Common Libraries** – Provide shared utilities and components for file handling, structured SQL queries, validation, and other cross-cutting functionality.
+
+Together, these components support the complete wholesale workflow, from company registration and order creation to inventory processing, invoicing, payment management, and final shipment.
 
 
 ---
@@ -231,25 +243,46 @@ This system allows fruit wholesalers to efficiently manage ordering, storage, an
 > Warehouseman: Packs, loads, and ensures shipments are prepared for transport.      
 > Order Lifecycle & Statuses    
 
-1️⃣ Customer selects products → Pending Order
+1️⃣ **Customer selects products** → Pending Order  
+2️⃣ **Order request sent** → Status: Requested  
+3️⃣ **Manager confirms availability** → Status: Confirmed  
+4️⃣ **Warehouse processes shipment** → Status: Assigned to Warehouse / In Preparation  
+   * *The warehouseman starts packing and preparing the items.*  
+   * *Once packing is complete, the warehouseman moves it to the Kanban/Status: **Awaiting Dispatch**.*
 
-2️⃣ Order request sent → Status: Requested
+5️⃣ **Payment & Quality Inspection (Awaiting Dispatch stage):**  
+   * *The warehouseman checks if the order has been paid.*  
+   * *If paid, it goes through an internal inspection to verify that the items are properly packed and error-free.*  
+   * *Once verified, it is marked as **Approved** for the final delivery stage.*  
+   *(Note: Advanced payment/inspection approval workflows are designed as future/optional extensions).*  
 
-3️⃣ Manager confirms availability → Status: Confirmed
+6️⃣ **Shipment begins** → Delivery Stage  
+7️⃣ **Customer receives order** → Completed
 
-4️⃣ Warehouse processes shipment → Status: Assigned to Warehouse / In Preparation
+## 🚨 **Cancellation Flow**:   
 
-5️⃣ Products packed → Status: Awaiting Dispatch
+* **Customer Cancellation:**  
+  * Orders can be canceled by the customer *after* a request is made, but a **reason for cancellation must be provided**.  
+  * Upon customer cancellation, the **Manager** receives a real-time **SignalR notification** detailing the cancellation and reason.
 
-6️⃣ Shipment begins → Delivery Stage
+* **Manager Cancellation & Payment/Approval Control:**  
+  * The **Manager** has the authority to cancel an order at any point if issues arise (e.g., payment delays or compliance issues) based on operational judgment rather than a strict 3-day hardcoded limit.  
+  * **SignalR Event Dispatching to Warehouse:** Since warehousemen are only engaged starting from the `In Preparation` status (meaning earlier states like `Requested` and `Confirmed` are hidden from them), the **Warehouseman** will only receive a cancellation notification if the order was already in progress (`In Preparation`), keeping their workflow strictly focused on active or relevant warehouse tasks.
 
-7️⃣ Customer receives order → Completed
+* **General Cancellation Rule:**  
+  * Orders can generally be canceled before loading into transport, provided payment or approval policies are not breached.
 
-## 🚨 **Cancellation & Payment Rules**:   
+### 💳 **Payment Rules & Dynamic Configuration**
 
-❌ Orders can be canceled before loading into transport unless payment is delayed.       
-✅ Customers must pay within 3 days or provide a guarantee; otherwise, the shipment is canceled.
+* **Flexible Payment Options during Order Request:**  
+  * When a customer places an order request, the backend evaluates dynamic payment rules (e.g., installment count selection, preferred payment date, a standard 30-day payment term, plus an applicable grace period).
 
+* **Dynamic Discounts & Amount Calculation:**  
+  * Depending on the customer's choice (paying in full vs. in installments) and the total order amount, the system automatically applies discount rules to compute the final payable amount.
+
+* **Manager Configuration Panel (Backoffice Settings):**  
+  * **Manager Control:** The **Manager** can modify payment rules, maximum installment limits, grace periods, and discount percentages at any time via a dedicated Settings navigation bar in the Backoffice.  
+  * **Real-Time Synchronization:** Updates are persisted to the database and automatically synchronized across both **Frontoffice** and **Backoffice** services to ensure consistent checkout and order processing.
 
 ---
 
