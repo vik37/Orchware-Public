@@ -50,7 +50,7 @@ Although the core implementation is complete, the project may continue to receiv
 
 ### 🧱 Tech Stack
 
-![Backend](https://img.shields.io/badge/backend-.NET-512BD4?logo=dotnet) ![C#](https://img.shields.io/badge/language-C%23-239120?logo=csharp&logoColor=white) ![RabbitMQ](https://img.shields.io/badge/messaging-RabbitMQ-FF6600?logo=rabbitmq&logoColor=white) ![Azure](https://img.shields.io/badge/cloud-Azure-0089D6?logo=microsoftazure&logoColor=white) ![Frontend](https://img.shields.io/badge/frontend-Angular-DD0031?logo=angular) ![Containerized](https://img.shields.io/badge/containerized-Docker-2496ED?logo=docker) ![Proxy](https://img.shields.io/badge/reverse%20proxy-NGINX-009639?logo=nginx) ![Serilog](https://img.shields.io/badge/logging-Serilog-4AB197?logo=serilog&logoColor=white)
+![Backend](https://img.shields.io/badge/backend-.NET-512BD4?logo=dotnet) ![C#](https://img.shields.io/badge/language-C%23-239120?logo=csharp&logoColor=white) ![RabbitMQ](https://img.shields.io/badge/messaging-RabbitMQ-FF6600?logo=rabbitmq&logoColor=white) ![Azure](https://img.shields.io/badge/cloud-Azure-0089D6?logo=microsoftazure&logoColor=white) ![Frontend](https://img.shields.io/badge/frontend-Angular-DD0031?logo=angular) ![Containerized](https://img.shields.io/badge/containerized-Docker-2496ED?logo=docker) ![Proxy](https://img.shields.io/badge/reverse%20proxy-NGINX-009639?logo=nginx)
 ![Seq](https://img.shields.io/badge/logging-Seq-12B886?logo=logstash) ![Tempo](https://img.shields.io/badge/tracing-Tempo-FFB300?logo=grafana) ![Prometheus](https://img.shields.io/badge/metrics-Prometheus-E6522C?logo=prometheus) ![OpenTelemetry](https://img.shields.io/badge/telemetry-OpenTelemetry-262261?logo=opentelemetry) ![Serilog](https://img.shields.io/badge/logging-Serilog-4AB197?logo=serilog&logoColor=white) 
 ![Redis](https://img.shields.io/badge/cache-Redis-DC382D?logo=redis&logoColor=white)
 ---
@@ -190,11 +190,11 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 🔹 [Business Overview](#-business-overview)    
 🔹 [Business Logic & Order Flow](#-business-logic--order-flow)   
 🔹 [Cancellation Flow](#-cancellation-flow)  
-🔹 [Payment Rules & Dynmaic (Rules) Configurations](#-payment-rules--dynamic-configuration)  
-🔹 [Payment Simmulations](#-bank-payment-simulation--azure-invoice-service)  
+🔹 [Payment Rules & Dynamic Configurations](#-payment-rules--dynamic-configuration)  
+🔹 [Payment Simulations](#-bank-payment-simulation--azure-invoice-service)  
 🔹 [Technical Overview](#-technical-overview)        
 🔹 [Technologies Used](#technologies-used)    
-🔹 [important Azure Services Business Workflows](#important--azure-services--business-workflows)   
+🔹 [Important — Azure Services & Business Workflows](#important--azure-services--business-workflows)   
 🔹 [Project Structure](#-project-structure)  
 🔹 [Setup Instructions](#setup-instructions)  
 🔹 [SignalR Test Client](#signalr-test-client)  
@@ -612,6 +612,7 @@ To ensure the full event-driven and billing-to-invoice pipeline functions correc
   "StampFunctionCode": "STAMP_CODE"
 },
 "StorageConnectionString": "[STORAGE_KEY]"
+```
 
 ### **Running the system**  
 
@@ -651,6 +652,7 @@ Orchware supports three deployment and execution approaches, depending on your d
   dotnet run --project src/Frontoffice/Orchware.Frontoffice.API
   dotnet run --project src/Backoffice/Orchware.Backoffice.Worker
   dotnet run --project src/Frontoffice/Orchware.Notification.API
+  ```
 
 **Option B: Run via Visual Studio (Hybrid Setup)**
 
@@ -672,7 +674,7 @@ docker compose -f docker-compose.yml -f docker-compose.application.yml up -d --b
 ```
 ---
 
-## SignalR Test Client
+## 🔌SignalR Test Client
 
 A lightweight standalone HTML utility for testing incoming real-time notifications through the Notification API's SignalR Hub.
 
