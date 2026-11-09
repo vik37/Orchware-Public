@@ -419,7 +419,7 @@ The Notification Service acts as a centralized, all-in-one hub responsible for h
 ✔ **MediatR (Commands, Queries, Domain Events [Notifications])** *(Used across: Backoffice API & Frontoffice API)*  
 ✔ **FluentValidation (Dto Models and Command Request Validations)** *(Used across: Backoffice API & Frontoffice API)*  
 ✔ **CsvHelper (CSV import/export)** *(Used in: Frontoffice API)*  
-✔ **MassTransit & MassTransit.RabbitMQ** *(Used across: Backoffice API, Frontoffice API, and Notification API)*  
+✔ **MassTransit & MassTransit.RabbitMQ** *(Used across: Backoffice API, Frontoffice API, and Notification API & Azure Functions)*  
 ✔ **Azure Cosmos DB & Azure Storage Blobs** *(Used in: Notification API & Billing Worker)*  
 ✔ **MailKit** *(Used in: Notification API)*  
 ✔ **Cronos** *(Used in: Billing Background Worker)*  
@@ -435,6 +435,129 @@ The Notification Service acts as a centralized, all-in-one hub responsible for h
 
 
 ---
+
+## Important – Azure Services & Business Workflows
+
+Orchware uses two Azure Functions and Azure Blob Storage with Event Grid to support its invoice generation, document management, and payment simulation workflows.
+
+**Important:** Both Azure Functions must be deployed separately to Azure, and the required Azure resources and application configurations must be provisioned for the complete system functionality. They are not included in the local Docker Compose environment.
+
+### 1. Order Confirmation & Automatic Invoice Generation
+
+This workflow handles invoice generation after a manager reviews and confirms a client's order.
+
+**Workflow:**
+
+1. A client submits an order request through the Frontoffice application.
+2. The manager receives a notification about the new order.
+3. After reviewing the order, the manager confirms it.
+4. The confirmed order and its billing information are persisted in the database.
+5. The Billing Worker periodically checks for new billing processes that need to be handled.
+6. When a new billing process is found, the worker retrieves the associated orders, maps their data into the corresponding Cosmos DB entity, and creates a document in Cosmos DB.
+7. The Cosmos DB Change Feed triggers an Azure Function that generates a PDF invoice using the order information.
+8. The generated PDF is uploaded to Azure Blob Storage.
+
+**Required Azure Resources & Configuration:**
+
+To enable this workflow, the following resources must be configured:
+
+- **Azure Function:** Deploy the [Create Invoice PDF Function](https://github.com/vik37/azfunc_cosmos_create_invoice), which listens to Cosmos DB changes and generates PDF invoices.
+- **Azure Blob Storage:** Create a Storage Account and a blob container named `orchware`.
+- **Azure Event Grid:** Configure an Event Grid subscription to listen for newly created blobs and apply the appropriate path filters:
+  - `/orchware/invoices/` – Invoice documents generated for installment-based payments.
+  - `/orchware/receipts/` – Documents generated for fully paid orders.
+- **Application Configuration:** Configure the required Cosmos DB, Blob Storage, Event Grid and other connection settings and secrets in the respective services.
+
+The Notification service also uses the Blob Storage events to notify the manager when a new document becomes available.
+
+### 2. Payment Simulation & Invoice Stamping
+
+Orchware also provides a payment simulation workflow that allows an administrator to simulate installment payments or full order payments.
+
+**Workflow:**
+
+1. The administrator opens the payment management section.
+2. The administrator selects **Mark as Paid** for a specific installment or chooses to pay the remaining order balance in full.
+3. The application triggers an HTTP request to a separately hosted Azure Function.
+4. The function locates the corresponding invoice in Blob Storage using the supplied order number and blob path.
+5. It applies the appropriate payment stamp to the PDF document and saves the updated document back to Blob Storage.
+6. The manager can subsequently download the updated invoice and verify the payment status.
+
+**Required Azure Function:**
+
+Deploy the [Stamp Invoice Function](https://github.com/vik37/StampInvoice_pub).
+
+This function exposes an HTTP-triggered endpoint (`stamp-invoice`) and accepts the following request payload:
+
+```json
+{
+  "orderNumber": "ON-XXXXXXXX",
+  "blobPath": "invoices/example-invoice.pdf"
+}
+```
+
+The function uses the order number and blob path to locate the document, apply the appropriate payment information and update the stored PDF.
+
+The function must be configured with the appropriate Blob Storage connection settings and container name.
+
+**Payment Verification:**
+
+Managers can also verify payment information through the invoice download endpoint:
+
+```http
+GET /api/order/payment/invoice
+```
+
+This allows the manager to retrieve the invoice and inspect its payment status.
+
+### Azure Deployment Checklist
+
+For both workflows to operate correctly, make sure the following components are deployed and configured:
+
+- [ ] Create and configure an Azure Storage Account.
+- [ ] Create the `orchware` blob container.
+- [ ] Configure the required blob paths (`invoices/` and `receipts/`).
+- [ ] Deploy the Create Invoice PDF Azure Function.
+- [ ] Configure its Cosmos DB Change Feed trigger.
+- [ ] Configure the Event Grid subscription and blob path filters.(Locally, it can be tested using ngrok).
+- [ ] Deploy the Stamp Invoice Azure Function.
+- [ ] Configure the required connection strings, secrets and application settings.
+- [ ] Configure the application and Notification service to use the deployed Azure resources.
+
+**Note:** These Azure integrations are required for the complete invoice generation, document notification and payment simulation workflows. The core application services can be started locally using Docker Compose, but these integrations require their respective Azure deployments.
+
+**Azure Event Grid – Blob Storage Event Subscription**
+
+The Notification API exposes an Event Grid webhook endpoint:
+
+```http
+POST /api/email/listener
+```
+
+The endpoint receives Azure Event Grid events and processes newly created invoice and receipt documents.
+
+When configuring the Event Grid subscription, the following settings are required:
+
+- **Event Type:** `Microsoft.Storage.BlobCreated`
+- **Endpoint:** `https://<public-host>/api/email/listener`
+- **Endpoint Type:** Web Hook
+- **Subject Filtering:** Configure filters to receive events only for the following blob paths:
+  - `/blobServices/default/containers/orchware/blobs/invoices/`
+  - `/blobServices/default/containers/orchware/blobs/receipts/`
+
+These filters ensure that the Notification API receives events only when a new invoice or receipt is uploaded, rather than for every newly created blob in the storage container.
+
+**Local Development & Testing**
+
+For local development, the Notification API webhook endpoint can be exposed through a public HTTPS tunnel using [ngrok](https://ngrok.com/).
+
+1. Start the Notification API locally.
+2. Expose its local HTTP port using ngrok.
+3. Use the generated public HTTPS URL followed by `/api/email/listener` as the Event Grid webhook endpoint.
+4. Complete the Event Grid endpoint validation.
+5. Configure the blob subject filters described above.
+
+**Note:** When using a temporary ngrok URL, update the Event Grid subscription endpoint whenever the tunnel URL changes.
 
 ## 🏗 **Project Structure**  
 
