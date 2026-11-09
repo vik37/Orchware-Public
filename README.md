@@ -197,7 +197,7 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 🔹 [important Azure Services Business Workflows](#important--azure-services--business-workflows)   
 🔹 [Project Structure](#-project-structure)  
 🔹 [Setup Instructions](#setup-instructions)  
-🔹 [SignalR Test Client](#-signalr-test-client)  
+🔹 [SignalR Test Client](#signalr-test-client)  
 🔹 [Common Libraries](#-common-libraries)  
 🔹 [UML Diagram](#uml-diagram)  
 🔹 [Docker Support](#-docker-support)    
@@ -672,7 +672,7 @@ docker compose -f docker-compose.yml -f docker-compose.application.yml up -d --b
 ```
 ---
 
-### SignalR Test Client
+## SignalR Test Client
 
 A lightweight standalone HTML utility for testing incoming real-time notifications through the Notification API's SignalR Hub.
 
