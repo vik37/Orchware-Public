@@ -16,20 +16,25 @@ A detailed description of the system's business logic, design, and development p
 
 ----
 
-## 🚧 Current Status – Work in Progress
+## 🚀 Current Status – Completed
 
-The project is actively under development and already includes key features such as:
+Orchware is a completed independent portfolio project featuring separate Frontoffice and Backoffice applications, supported by dedicated API services and background processing through a Billing Worker.
 
-- 🛒 **Frontoffice**: Product browsing  
-- 📦 **Backoffice**: Inventory management
+The application includes:
 
-The core architecture is in place, and new features are added continuously.  
-The app is live, and updates are delivered in real time via a CI/CD pipeline.
+- 🛒 **Frontoffice** – Product browsing, company registration, order placement, order tracking, and payment management.
+- 📦 **Backoffice** – Inventory management, order processing, warehouse operations, and administrative functionalities.
+- 🔔 **Notification Service** – Email notifications and real-time updates using SignalR.
+- 🧾 **Billing & Invoicing** – Automated invoice generation and payment processing workflows.
+- 📊 **Observability** – Centralized logging, distributed tracing, and metrics monitoring.
+
+The application is containerized with Docker and supported by a CI/CD pipeline for automated builds and deployment.
+
+Although the core implementation is complete, the project may continue to receive improvements, refinements, and maintenance.
 
 💬 _Feedback and suggestions are always welcome!_
 
-![Status](https://img.shields.io/badge/status-in%20progress-yellow) ![Maintained](https://img.shields.io/badge/maintained-yes-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue)
-
+![Status](https://img.shields.io/badge/status-completed-brightgreen) ![Maintained](https://img.shields.io/badge/maintained-yes-brightgreen) ![License](https://img.shields.io/badge/license-see%20LICENSE-blue)
 # Agile Methodology - Kanban
 ## 📊 Issue Count by Status ## 📊 Issue Count by Status <!-- STATUS START -->
 
