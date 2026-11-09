@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+
+const localUrl = "https://localhost:7213/notificationHub";
+const dockerUrl = "http://localhost:6050/notificationHub";
+
+window.notificationConnection = new signalR.HubConnectionBuilder()
+    
+    .withUrl(localUrl, {
+        accessTokenFactory: () => "[REPLACE with JWT TOKEN]"
+    })
+    .withAutomaticReconnect()
+    .build();
+
+window.notificationConnection.on("ReceiveNotification", data => {
+    console.log("NOTIFICATION:", data);
+});
+
+window.notificationConnection.start()
+    .then(() => console.log("Connected to SignalR"))
+    .catch(err => console.error("Connection failed: ", err));
+</script>
+</body>
+</html>
