@@ -194,6 +194,7 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 🔹 [Payment Simmulations](#-bank-payment-simulation--azure-invoice-service)  
 🔹 [Technical Overview](#-technical-overview)        
 🔹 [Technologies Used](#technologies-used)    
+🔹 [important Azure Services Business Workflows](#important--azure-services--business-workflows)   
 🔹 [Project Structure](#-project-structure)  
 🔹 [Setup Instructions](#setup-instructions)  
 🔹 [Common Libraries](#-common-libraries)  
