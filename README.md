@@ -36,7 +36,7 @@ Although the core implementation is complete, the project may continue to receiv
 
 ![Status](https://img.shields.io/badge/status-completed-brightgreen) ![Maintained](https://img.shields.io/badge/maintained-yes-brightgreen) ![License](https://img.shields.io/badge/license-see%20LICENSE-blue)
 # Agile Methodology - Kanban
-## 📊 Issue Count by Status ## 📊 Issue Count by Status <!-- STATUS START -->
+## 📊 Issue Count by Status <!-- STATUS START -->
 
 ![Todo](https://img.shields.io/badge/todo-2-blue?style=flat-square)
 ![In-progress](https://img.shields.io/badge/in--progress-0-yellow?style=flat-square)
@@ -196,7 +196,6 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 🔹 [Technologies Used](#technologies-used)    
 🔹 [Project Structure](#-project-structure)  
 🔹 [Setup Instructions](#setup-instructions)  
-🔹 [Quick Start](#-quick-start)    
 🔹 [Common Libraries](#-common-libraries)  
 🔹 [UML Diagram](#uml-diagram)  
 🔹 [Docker Support](#-docker-support)    
