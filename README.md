@@ -197,6 +197,7 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 🔹 [important Azure Services Business Workflows](#important--azure-services--business-workflows)   
 🔹 [Project Structure](#-project-structure)  
 🔹 [Setup Instructions](#setup-instructions)  
+🔹 [SignalR Test Client](#-signalr-test-client)  
 🔹 [Common Libraries](#-common-libraries)  
 🔹 [UML Diagram](#uml-diagram)  
 🔹 [Docker Support](#-docker-support)    
