@@ -74,7 +74,7 @@ To simplify setup and demonstrate the system's security features, you can easily
 2.  **Import Realm Configuration:**
     * Navigate to your Keycloak Admin Console (e.g., `http://localhost:8080/admin`).
     * Click on **"Add Realm"** (or **"Create Realm"**).
-    * Select the **"Import realm"** option and upload the `keycloak-config/orchware-dev-realm.json` file from this repository.
+    * Select the **"Import realm"** option and upload the `keycloak-config/realm-export.json` file from this repository.
 
     **📺 For a step-by-step visual guide on importing the JSON, watch this video:**
     [Import JSON file to Keycloak example](http://www.youtube.com/watch?v=XpHxA46w9F4)
@@ -118,7 +118,7 @@ builder.Services.AddAuthorization(opt => {
         {
             var roles = ctx.User.FindAll(ClaimTypes.Role).Select(r => r.Value);
             var hasUserRole = roles.Contains("user");
-            var isEmployee = roles.Any(r => new[] { "manager", "warehouseman" }.Contains(r));
+            var isEmployee = roles.Any(r => new[] { "manager", "warehouseman", "admin" }.Contains(r));
 
             return hasUserRole && !isEmployee;
         });
@@ -201,7 +201,6 @@ It handles **inventory, orders, and shipping operations**, using modern **DDD**,
 🔹 [Common Libraries](#-common-libraries)  
 🔹 [UML Diagram](#uml-diagram)  
 🔹 [Docker Support](#-docker-support)    
-🔹 [Additional Context](#additional-context)  
 🔹 [Articles & Publications](#articles--publications)  
 🔹 [License](#license)  
 | 🔹 [What's New](#news)                                                                                                     |
@@ -261,6 +260,10 @@ Together, these components support the complete wholesale workflow, from company
 6️⃣ **Shipment begins** → Delivery Stage  
 7️⃣ **Customer receives order** → Completed
 
+### Example Full Application _'diagram'_
+
+<img src="git_docs/images/diagram.png" alt="Order Flow Diagram" width="400" />
+
 ## 🚨 **Cancellation Flow**:   
 
 * **Customer Cancellation:**  
@@ -290,22 +293,26 @@ Together, these components support the complete wholesale workflow, from company
 
 To simulate real-world B2B transactional workflows without external payment gateway dependencies, Orchware features an in-house **Bank Payment Simulator**:
 
-* **Company Account & Budget Initialization:**  
+- **Company Account & Budget Initialization:**  
   * Upon initial registration, every client company is automatically assigned a randomized starting account balance/budget in the system.
 
-* **Admin Payment Simulation (Bank Proxy):**  
-  * An **Admin** user can access the payment administration queue to simulate bank settlement for outstanding orders ("Mark as Paid").  
+- **Admin Payment Simulation & Installment Lifecycle:**  
+  * An **Admin** user can log in, navigate to the payment management section from the project dashboard, and view a list of orders ranging from `in preparation` to `approved.
   * **Solvency Check:** Before confirming payment, the system performs an automated balance check against the purchasing company's account budget to ensure sufficient funds exist.
+  * **Single vs. Installment Payments:** 
+    * For orders paid in full, a single **"Mark as Paid"** action settles the transaction.
+    * For installment-based payments, the process flows progressively: the first installment invoice is already generated and sent to the client, allowing the admin to click **"Mark as Paid"** for it.
+    * Subsequent installments appear as sequential buttons (e.g., `[01]`, `[02]`, `[03]`...) and remain disabled by default.
 
-* **Installment Billing Cycle & Background Worker Service:**  
-  * **First Installment Settlement:** When an order is split into installments, the customer/admin can initially settle only the first installment.  
-  * **Automated Invoice Generation by Billing Worker:** A dedicated **Background Worker Service (Billing)** periodically runs to generate the invoice for each upcoming installment when due.  
-  * **Progressive Payment Workflow:** The "Mark as Paid" action is progressively enabled for each newly generated installment invoice until all installments are settled.  
+- **Background Worker & Progressive Payment Workflow:**  
+  * A dedicated **Background Worker Service (Billing)** periodically runs to generate the invoice for each upcoming installment when due.  
+  * Once the worker generates and sends the invoice for the next installment, the corresponding button is automatically enabled, allowing it to be settled progressively.  
   * **Full Payment Completion (`IsFullPaid`):** Only after the final installment is paid, the system automatically flags the entire order with `IsFullPaid = true` across both Frontoffice and Backoffice domain models.
 
-* **Automated Azure Function Invoice Generation:**  
-  * Upon successful balance validation, the settlement triggers an **Azure Function** microservice that dynamically generates a stamped digital invoice (PDF).  
-  * **Verified Bank Stamp & Details:** The generated invoice automatically includes structured order items, applicable discounts, payment terms, and official bank verification metadata (*Bank Name, Representative Signature, and Verified Bank Stamp*).
+- **Simulated Payment Verification & Azure Function Stamping:**  
+  * Upon successful balance validation, clicking **"Mark as Paid"** triggers an **HTTP-based Azure Function** microservice.
+  * The Azure Function locates the corresponding invoice PDF in Azure Blob Storage and updates the document by adding simulated payment metadata (*such as internal bank proxy confirmation details, representative signature, and an in-house verification stamp*).
+  * This entire mechanism is a simulated B2B transaction workflow designed to mimic real-world financial operations without relying on live external bank integrations.
  
 ![Success Payment Message](git_docs/images/client_email_success_message.png) ![Error Payment Message](git_docs/images/client_email_error_message.png)
 
@@ -316,23 +323,7 @@ To simulate real-world B2B transactional workflows without external payment gate
 ### - $${\color{red}Frontoffice API -}$$ 
 ✅ Built using **Vertical Slice Architecture** organized by features (e.g., `Company`, `Orders`, `Payments`, `Products`).  
 ✅ **Strict Client Authorization Policy:** Implements custom policy-based authorization (`NonEmployeeUser`) ensuring that endpoints are strictly dedicated to registered external clients. It enforces that users must possess the `user` role while explicitly blocking any internal employee roles (`manager`, `warehouseman`, `admin`).  
-  * *Example Policy Implementation:*
-    ```csharp
-    services.AddAuthorization(opt => 
-    {
-        opt.AddPolicy("NonEmployeeUser", policy => 
-        {
-            policy.RequireAssertion(ctx =>
-            {
-                var roles = ctx.User.FindAll(ClaimTypes.Role).Select(r => r.Value);
-                var hasUserRole = roles.Contains("user");
-                var isEmployee = roles.Any(r => new[] { "manager", "warehouseman", "admin" }.Contains(r));
-
-                return hasUserRole && !isEmployee;
-            });
-        });
-    });
-    ```
+ 
 ✅ **Domain Models:** Manages core entities including `Order`, `OrderDetails`, `Company`, `Payment`, `Installment`, `PaymentRules`, `Product`, and `User`.  
 ✅ **Event-Driven Integration (RabbitMQ):** Implements robust cross-service communication via Integration Event Consumers (`EmployeeCancelledOrderEventConsumer`, `InvoiceSentIntegrationEventConsumer`, `OrderApprovedIntegrationEventConsumer`, `OrderConfirmedIntegrationEventConsumer`, `OrderPackedIntegrationEventConsumer`, `PaymentRequestedIntegrationEventConsumer`, `PaymentRuleChangedIntegrationEventConsumer`).  
 ✅ **Distributed Caching & Locking:** Utilizes **Redis** (`RedisDistributedCacheService`, `RedisLockService`) for high-performance draft management and concurrency control.  
@@ -620,8 +611,7 @@ To ensure the full event-driven and billing-to-invoice pipeline functions correc
 
 **Clone the repository**  
 ```bash
-git clone https://github.com/your-repo/orchware.git
-cd orchware run
+git clone https://github.com/vik37/Orchware-Public.git
 ```
 
 Additionally, for containerized deployments via Docker, ensure you configure the corresponding Keycloak authentication client secret in docker-compose.application.yml:
@@ -636,11 +626,6 @@ environment:
 ```Bash
 dotnet restore
 ```
-**Run the Services** 
-```Bash
-dotnet run --project src/Backoffice/Orchware.Backoffice.API
-dotnet run --project src/Frontoffice/Orchware.Frontoffice.API
-```
 
 ### 3. Run the Services
 
@@ -649,8 +634,8 @@ Orchware supports three deployment and execution approaches, depending on your d
 * **Option A: Run via .NET CLI (Core APIs)**
   ```bash
   dotnet run --project src/Backoffice/Orchware.Backoffice.API
+  dotnet run --project src/Backoffice/backoffice-worker
   dotnet run --project src/Frontoffice/Orchware.Frontoffice.API
-  dotnet run --project src/Backoffice/Orchware.Backoffice.Worker
   dotnet run --project src/Frontoffice/Orchware.Notification.API
   ```
 
@@ -667,7 +652,7 @@ Then, right-click the solution in Visual Studio, select Configure Startup Projec
 
 **Option C: Run Entire System via Docker Compose**
 
-To spin up all microservices, workers, and infrastructure containers together:
+To spin up all api services, workers, and infrastructure containers together:
 
 ```Bash
 docker compose -f docker-compose.yml -f docker-compose.application.yml up -d --build
@@ -779,31 +764,6 @@ var query = new SqlQueryBuilder()
 ✅ **Docker** is supported for easier deployment.  
 
 ---
-
-## Additional Context
-
-### Why is this not a microservices or monolithic architecture?
-
-Orchware is architected around modular services to balance clarity, maintainability, and future extensibility:
-
-- **Backoffice** – Handles business operations like product and order management (EF Core + Clean Architecture + DDD)  
-- **Frontoffice** – Optimized read-only API for product data (Dapper + Vertical Slice Architecture)  
-- **Frontend** – Angular-based UI deployed and publicly available  
-- **Notification Service** – In progress (SignalR for real-time notifications)  
-- **Email Service / Azure Integration** – Planned additions (Azure Functions, Logic Apps, etc.)
-
-This system does **not** follow a strict microservices architecture to keep deployment and management simple for portfolio use. However, it demonstrates:
-
-- **Event-driven readiness** (modular, publish-subscribe structure)  
-- **Scalable design patterns** (Clean Architecture, separation of concerns)  
-- **Cloud-deployable structure** (Docker + GitHub Actions CI/CD)  
-- **Real-world tech stack** combining Angular, .NET, Dapper, EF Core, and OpenTelemetry
-
-The goal is to present a **production-like, modular system** suitable for real-world scenarios and job demonstration.
-
-### Final look _'diagram'_ when finished
-
-![Final Diagram](git_docs/images/diagram.png)
   
 ## Articles & Publications
 
@@ -1188,7 +1148,7 @@ registerForm() {
 
 ### Security & Auth
 
-* All sensitive endpoints are protected with ``[Authorize(Policy = "Non Employee User")]``. 
+* All sensitive endpoints are protected with Authorization & Authentication (JWT Token), OAuth2, OIDC. 
 * Rate limiting is used to prevent abuse.        
 
 ### Video Documentation 
